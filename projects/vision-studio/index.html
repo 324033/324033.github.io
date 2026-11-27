@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaPipe Vision Suite</title>
+    <link rel="stylesheet" href="../assets/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 9v6M9 12h6" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1>MediaPipe Vision Studio</h1>
+                    <p class="subtitle">Local computer vision for Images, Video Files & YouTube &bull; Objects, Face Mesh, Fitness Coach, Hand Gestures, Virtual Background, Face Keypoints &amp; Teachable Machine</p>
+                </div>
+            </div>
+            
+            <div class="header-nav">
+                <button type="button" class="nav-tab active" data-mode="object">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    Object Detection
+                </button>
+                <button type="button" class="nav-tab" data-mode="facemesh">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2a8 8 0 0 0-8 8c0 5 8 12 8 12s8-7 8-12a8 8 0 0 0-8-8z"/>
+                        <circle cx="9" cy="9" r="1"/>
+                        <circle cx="15" cy="9" r="1"/>
+                        <path d="M9 13s1.5 2 3 2 3-2 3-2"/>
+                    </svg>
+                    3D Face Mesh
+                </button>
+                <button type="button" class="nav-tab" data-mode="video">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="23 7 16 12 23 17 23 7"/>
+                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                    </svg>
+                    Video & YouTube
+                </button>
+                <button type="button" class="nav-tab" data-mode="fitness">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/>
+                    </svg>
+                    Fitness Coach
+                </button>
+                <button type="button" class="nav-tab" data-mode="gestures">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+                    Hand Gestures
+                </button>
+                <button type="button" class="nav-tab" data-mode="background">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="12" cy="11" r="3"/><path d="M6.5 20a5.5 5.5 0 0 1 11 0"/><path d="M2 9l4-3M22 9l-4-3"/></svg>
+                    Virtual Background
+                </button>
+                <button type="button" class="nav-tab" data-mode="facekeys">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="1.6"/><circle cx="15" cy="10" r="1.6"/><path d="M12 12.5l-1 2h2z"/><rect x="10.5" y="16" width="3" height="1.6"/></svg>
+                    Face Keypoints
+                </button>
+                <button type="button" class="nav-tab" data-mode="tm">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.4l-4.8 2.5.9-5.4L4.2 7.7l5.4-.8z"/><path d="M5 21h14"/></svg>
+                    Teachable Machine
+                </button>
+                <a class="nav-tab nav-tab-link" href="../yolo26-detection/" title="Opens the YOLO26 detection page">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="8" height="8" rx="1"/><rect x="13" y="11" width="8" height="8" rx="1"/></svg>
+                    YOLO26 Detection &#x2197;
+                </a>
+                <a class="nav-tab nav-tab-link" href="../cctv-analytics/" title="Vehicle counting, heatmap and speed estimation">
+                    &#x1F697; CCTV Analytics &#x2197;
+                </a>
+            </div>
+
+            <div class="header-status">
+                <span class="status-dot"></span>
+                <span class="status-text">Runs in your browser</span>
+            </div>
+        </header>
+
+        <!-- ================= 1. OBJECT DETECTION SECTION ================= -->
+        <main class="main-content" id="objectModeSection">
+            <section class="control-panel">
+                <div class="panel-card">
+                    <h2 class="card-title">Upload Image</h2>
+                    <div class="dropzone" id="dropzone">
+                        <input type="file" id="fileInput" accept="image/png, image/jpeg, image/webp" class="file-input">
+                        <div class="dropzone-content">
+                            <div class="upload-icon">
+                                <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-linecap="round"/>
+                                    <polyline points="17 8 12 3 7 8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <line x1="12" y1="3" x2="12" y2="15" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <p class="dropzone-text"><strong>Click to upload</strong> or drag & drop</p>
+                            <p class="dropzone-hint">Supports JPG, PNG, WEBP &bull; Paste with <kbd>Ctrl</kbd> + <kbd>V</kbd></p>
+                        </div>
+                    </div>
+
+                    <div class="sample-section">
+                        <span class="sample-label">Or try a built-in demo:</span>
+                        <div class="sample-buttons">
+                            <button type="button" class="btn-sample" data-sample="street">🚗 Street Traffic</button>
+                            <button type="button" class="btn-sample" data-sample="workspace">💻 Office Desk</button>
+                            <button type="button" class="btn-sample" data-sample="pets">🐕 Living Room</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-card">
+                    <h2 class="card-title">Detection Parameters</h2>
+                    <div class="param-group">
+                        <div class="param-header">
+                            <label for="thresholdRange">Confidence Threshold</label>
+                            <span id="thresholdVal" class="param-val">30%</span>
+                        </div>
+                        <input type="range" id="thresholdRange" min="0.10" max="0.95" step="0.05" value="0.30" class="range-slider">
+                        <div class="param-scale">
+                            <span>10% (more detections)</span>
+                            <span>95% (strict)</span>
+                        </div>
+                    </div>
+
+                    <div class="param-group">
+                        <div class="param-header">
+                            <label for="maxResultsSelect">Maximum Detections</label>
+                            <span id="maxResultsVal" class="param-val">20</span>
+                        </div>
+                        <select id="maxResultsSelect" class="styled-select">
+                            <option value="10">Top 10 objects</option>
+                            <option value="20" selected>Top 20 objects</option>
+                            <option value="50">Top 50 objects</option>
+                        </select>
+                    </div>
+
+                    <button id="reanalyzeBtn" class="btn-primary" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
+                        <span>Re-detect with Settings</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="results-panel">
+                <div class="metrics-bar" id="metricsBar" style="display: none;">
+                    <div class="metric-item">
+                        <span class="metric-label">Objects Detected</span>
+                        <span class="metric-value" id="metricCount">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Inference Time</span>
+                        <span class="metric-value" id="metricTime">0 ms</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Resolution</span>
+                        <span class="metric-value" id="metricResolution">0 &times; 0</span>
+                    </div>
+                </div>
+
+                <div class="viewer-card" id="viewerCard">
+                    <div class="empty-state" id="emptyState">
+                        <div class="empty-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                        </div>
+                        <h3>No image analyzed yet</h3>
+                        <p>Upload a photo or select a demo sample to see real-time object recognition in action.</p>
+                    </div>
+
+                    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Running MediaPipe Object Detection...</p>
+                    </div>
+
+                    <div class="display-container" id="displayContainer" style="display: none;">
+                        <div class="view-controls">
+                            <div class="tab-group">
+                                <button class="tab-btn active" data-tab="annotated">Annotated</button>
+                                <button class="tab-btn" data-tab="original">Original</button>
+                            </div>
+                            <div class="action-buttons">
+                                <a id="downloadBtn" download="annotated_detection.jpg" class="btn-action">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7 10 12 15 17 10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                    Download Image
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="image-stage">
+                            <img id="resultImage" alt="Detection Output">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-card" id="detailsCard" style="display: none;">
+                    <div class="details-header">
+                        <h3>Detection Breakdown</h3>
+                        <div class="tags-container" id="tagsContainer"></div>
+                    </div>
+                    <div class="detections-table-container">
+                        <table class="detections-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Category</th>
+                                    <th>Confidence</th>
+                                    <th>Bounding Box (X, Y, W, H)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detectionsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ================= 2. 3D FACE MESH SECTION ================= -->
+        <main class="main-content" id="faceMeshModeSection" style="display: none;">
+            <section class="control-panel">
+                <div class="panel-card">
+                    <h2 class="card-title">Face Image</h2>
+                    <div class="dropzone" id="faceDropzone">
+                        <input type="file" id="faceFileInput" accept="image/png, image/jpeg, image/webp" class="file-input">
+                        <div class="dropzone-content">
+                            <div class="upload-icon">
+                                <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M12 2a8 8 0 0 0-8 8c0 5 8 12 8 12s8-7 8-12a8 8 0 0 0-8-8z"/>
+                                    <circle cx="9" cy="9" r="1"/>
+                                    <circle cx="15" cy="9" r="1"/>
+                                    <path d="M9 13s1.5 2 3 2 3-2 3-2"/>
+                                </svg>
+                            </div>
+                            <p class="dropzone-text" id="faceDropText"><strong>Click to upload face photo</strong> or drag & drop</p>
+                            <p class="dropzone-hint">Supports JPG, PNG, WEBP &bull; Paste with <kbd>Ctrl</kbd> + <kbd>V</kbd></p>
+                        </div>
+                    </div>
+
+                    <div class="sample-section">
+                        <span class="sample-label">Or try a sample face:</span>
+                        <div class="sample-buttons">
+                            <button type="button" class="btn-sample-face" data-sample="portrait">👤 Portrait Face</button>
+                            <button type="button" class="btn-sample-face" data-sample="smiling">😊 Smiling Portrait</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-card">
+                    <h2 class="card-title">Mesh Appearance & Background</h2>
+
+                    <div class="param-group">
+                        <label class="input-label">Background</label>
+                        <div class="segmented-control">
+                            <button type="button" class="segment-btn active" data-bg="original">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                    <polyline points="21 15 16 10 5 21"/>
+                                </svg>
+                                Original Photo
+                            </button>
+                            <button type="button" class="segment-btn" data-bg="black">
+                                <span class="black-bg-indicator"></span>
+                                Solid Black (Hologram)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="param-group">
+                        <div class="param-header">
+                            <label for="meshStyleSelect">Drawing Mode</label>
+                        </div>
+                        <select id="meshStyleSelect" class="styled-select">
+                            <option value="both" selected>Dual Layer (Full Mesh + Bold Contours)</option>
+                            <option value="tesselation">Full 3D Tesselation Mesh (468 points)</option>
+                            <option value="contours">Facial Contours Only (Eyes, Lips, Oval)</option>
+                            <option value="contours_irises">Contours + Irises (Gaze)</option>
+                            <option value="points">Landmark Point Cloud (Dots Only)</option>
+                        </select>
+                    </div>
+
+                    <div class="param-group">
+                        <label class="input-label">Color Theme</label>
+                        <div class="color-swatches" id="faceColorSwatches">
+                            <button type="button" class="color-swatch active" data-color="cyan" title="Cyber Cyan" style="--swatch-color: #00f5ff;"></button>
+                            <button type="button" class="color-swatch" data-color="magenta" title="Cyberpunk Magenta" style="--swatch-color: #ff007f;"></button>
+                            <button type="button" class="color-swatch" data-color="green" title="Matrix Emerald" style="--swatch-color: #00ff66;"></button>
+                            <button type="button" class="color-swatch" data-color="purple" title="Electric Violet" style="--swatch-color: #9d4edd;"></button>
+                            <button type="button" class="color-swatch" data-color="gold" title="Warm Gold" style="--swatch-color: #ffd700;"></button>
+                            <button type="button" class="color-swatch" data-color="white" title="Minimalist White" style="--swatch-color: #ffffff;"></button>
+                        </div>
+                    </div>
+
+                    <div class="param-group">
+                        <div class="param-header">
+                            <label for="faceThicknessRange">Contour Line Width</label>
+                            <span id="faceThicknessVal" class="param-val">1 px</span>
+                        </div>
+                        <input type="range" id="faceThicknessRange" min="1" max="4" step="1" value="1" class="range-slider">
+                    </div>
+
+                    <div class="param-group checkbox-group">
+                        <label class="custom-checkbox-label">
+                            <input type="checkbox" id="drawPointsCheck">
+                            <span>Draw 468 landmark dots</span>
+                        </label>
+                    </div>
+
+                    <button id="reanalyzeFaceBtn" class="btn-primary" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
+                        <span>Update Mesh View</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="results-panel">
+                <div class="metrics-bar" id="faceMetricsBar" style="display: none;">
+                    <div class="metric-item">
+                        <span class="metric-label">Faces Detected</span>
+                        <span class="metric-value" id="faceMetricCount">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Landmarks / Face</span>
+                        <span class="metric-value">468 (3D)</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Inference Time</span>
+                        <span class="metric-value" id="faceMetricTime">0 ms</span>
+                    </div>
+                </div>
+
+                <div class="viewer-card" id="faceViewerCard">
+                    <div class="empty-state" id="faceEmptyState">
+                        <div class="empty-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                                <path d="M12 2a8 8 0 0 0-8 8c0 5 8 12 8 12s8-7 8-12a8 8 0 0 0-8-8z"/>
+                                <circle cx="9" cy="9" r="1"/>
+                                <circle cx="15" cy="9" r="1"/>
+                                <path d="M9 13s1.5 2 3 2 3-2 3-2"/>
+                            </svg>
+                        </div>
+                        <h3>No face analyzed yet</h3>
+                        <p>Upload a portrait or select a sample to generate 468 3D facial landmarks with customizable mesh and background styles.</p>
+                    </div>
+
+                    <div class="loading-overlay" id="faceLoadingOverlay" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Fitting 468 3D Facial Landmarks...</p>
+                    </div>
+
+                    <div class="display-container" id="faceDisplayContainer" style="display: none;">
+                        <div class="view-controls">
+                            <div class="tab-group">
+                                <button class="tab-btn active" data-facetab="mesh">Face Mesh</button>
+                                <button class="tab-btn" data-facetab="original">Original Photo</button>
+                            </div>
+                            <div class="action-buttons">
+                                <a id="faceDownloadBtn" download="face_mesh.jpg" class="btn-action">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7 10 12 15 17 10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                    Download Face Mesh
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="image-stage">
+                            <img id="faceResultImage" alt="Face Mesh Output">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-card" id="faceDetailsCard" style="display: none;">
+                    <div class="details-header">
+                        <h3>MediaPipe 468 3D Landmark Topology</h3>
+                        <p style="font-size: 0.82rem; color: var(--text-secondary);">
+                            MediaPipe Face Mesh predicts 468 3D surface landmarks in real-time, accurately modeling facial geometry, eye boundaries, lips, eyebrows, nose, and facial contours.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ================= 3. VIDEO FILES & YOUTUBE SECTION ================= -->
+        <main class="main-content" id="videoModeSection" style="display: none;">
+            <section class="control-panel">
+                <!-- Task Selection: Objects vs Face Mesh on Video -->
+                <div class="panel-card">
+                    <h2 class="card-title">Video Detection Task</h2>
+                    <div class="source-pills" id="videoTaskPills">
+                        <button type="button" class="pill-btn active" data-vtask="object">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                            Object Detection
+                        </button>
+                        <button type="button" class="pill-btn" data-vtask="facemesh">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2a8 8 0 0 0-8 8c0 5 8 12 8 12s8-7 8-12a8 8 0 0 0-8-8z"/>
+                                <circle cx="9" cy="9" r="1"/>
+                                <circle cx="15" cy="9" r="1"/>
+                                <path d="M9 13s1.5 2 3 2 3-2 3-2"/>
+                            </svg>
+                            3D Face Mesh
+                        </button>
+                        <button type="button" class="pill-btn" data-vtask="fitness">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/>
+                            </svg>
+                            Arm Reps
+                        </button>
+                    </div>
+
+                    <!-- Source Selection: Upload Video File vs YouTube URL -->
+                    <div class="source-pills" style="margin-top: 10px;">
+                        <button type="button" class="pill-btn active" data-source="upload">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            Upload Video File
+                        </button>
+                        <button type="button" class="pill-btn" data-source="youtube">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                            YouTube URL
+                        </button>
+                    </div>
+
+                    <!-- Video Upload Dropzone (Primary) -->
+                    <div id="videoUploadSection" class="source-content">
+                        <div class="dropzone" id="videoDropzone">
+                            <input type="file" id="videoFileInput" accept="video/mp4, video/webm, video/quicktime, video/x-msvideo" class="file-input">
+                            <div class="dropzone-content">
+                                <div class="upload-icon">
+                                    <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <polygon points="23 7 16 12 23 17 23 7"/>
+                                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                                    </svg>
+                                </div>
+                                <p class="dropzone-text" id="videoDropText"><strong>Click to select a video file</strong> or drag & drop</p>
+                                <p class="dropzone-hint">Supports MP4, WEBM, MOV, AVI, MKV (on-demand processing)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- YouTube Input Box -->
+                    <div id="youtubeInputSection" class="source-content" style="display: none;">
+                        <p class="param-hint" style="margin-bottom:8px"><b>Online version:</b> YouTube links need the local Python server. Please use &ldquo;Upload Video File&rdquo; here.</p>
+                        <label for="ytUrlInput" class="input-label">Enter YouTube Link:</label>
+                        <div class="url-input-wrap">
+                            <input type="url" id="ytUrlInput" placeholder="https://www.youtube.com/watch?v=..." class="styled-text-input">
+                        </div>
+
+                        <div class="sample-section" style="margin-top: 14px;">
+                            <span class="sample-label">Quick sample videos:</span>
+                            <div class="sample-buttons">
+                                <button type="button" class="btn-sample-yt" data-url="https://www.youtube.com/watch?v=aqz-KE-bpKQ">🏙️ City Walk</button>
+                                <button type="button" class="btn-sample-yt" data-url="https://www.youtube.com/watch?v=MNn9qKG2UFI">🚗 Highway Traffic</button>
+                                <button type="button" class="btn-sample-yt" data-url="https://www.youtube.com/watch?v=VpYx_1qTjHQ">🐶 Pets & Animals</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Processing Parameters -->
+                <div class="panel-card">
+                    <h2 class="card-title">Processing Settings</h2>
+
+                    <!-- Task-specific settings: Object Detection -->
+                    <div id="videoObjectParamsSection">
+                        <div class="param-group">
+                            <div class="param-header">
+                                <label for="videoThresholdRange">Detection Threshold</label>
+                                <span id="videoThresholdVal" class="param-val">30%</span>
+                            </div>
+                            <input type="range" id="videoThresholdRange" min="0.10" max="0.95" step="0.05" value="0.30" class="range-slider">
+                        </div>
+                    </div>
+
+                    <!-- Task-specific settings: Face Mesh -->
+                    <div id="videoFaceMeshParamsSection" style="display: none;">
+                        <div class="param-group">
+                            <label class="input-label">Video Background</label>
+                            <div class="segmented-control">
+                                <button type="button" class="segment-btn active" data-vbg="original">Original Video</button>
+                                <button type="button" class="segment-btn" data-vbg="black">
+                                    <span class="black-bg-indicator"></span>
+                                    Solid Black (Hologram)
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="param-group">
+                            <label class="input-label">Mesh Style</label>
+                            <select id="vMeshStyleSelect" class="styled-select">
+                                <option value="both" selected>Dual Layer (Mesh + Contours)</option>
+                                <option value="tesselation">Full 3D Tesselation Mesh</option>
+                                <option value="contours">Facial Contours Only</option>
+                                <option value="contours_irises">Contours + Irises</option>
+                                <option value="points">Landmark Dots</option>
+                            </select>
+                        </div>
+
+                        <div class="param-group">
+                            <label class="input-label">Color Theme</label>
+                            <div class="color-swatches" id="vColorSwatches">
+                                <button type="button" class="color-swatch active" data-vcolor="cyan" title="Cyber Cyan" style="--swatch-color: #00f5ff;"></button>
+                                <button type="button" class="color-swatch" data-vcolor="magenta" title="Cyberpunk Magenta" style="--swatch-color: #ff007f;"></button>
+                                <button type="button" class="color-swatch" data-vcolor="green" title="Matrix Emerald" style="--swatch-color: #00ff66;"></button>
+                                <button type="button" class="color-swatch" data-vcolor="purple" title="Electric Violet" style="--swatch-color: #9d4edd;"></button>
+                                <button type="button" class="color-swatch" data-vcolor="gold" title="Warm Gold" style="--swatch-color: #ffd700;"></button>
+                                <button type="button" class="color-swatch" data-vcolor="white" title="Minimalist White" style="--swatch-color: #ffffff;"></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Task-specific settings: Fitness arm reps -->
+                    <div id="videoFitnessParamsSection" style="display: none;">
+                        <div class="param-group">
+                            <div class="param-header">
+                                <label for="vExtendedRange">Arm counts as straight above</label>
+                                <span id="vExtendedVal" class="param-val">150&deg;</span>
+                            </div>
+                            <input type="range" id="vExtendedRange" min="120" max="175" step="5" value="150" class="range-slider">
+                        </div>
+                        <div class="param-group">
+                            <div class="param-header">
+                                <label for="vBentRange">Arm counts as bent below</label>
+                                <span id="vBentVal" class="param-val">60&deg;</span>
+                            </div>
+                            <input type="range" id="vBentRange" min="30" max="100" step="5" value="60" class="range-slider">
+                            <span class="param-hint">One rep = straight &rarr; bent &rarr; straight. Left and right arm are counted separately. Use 12+ FPS for fast reps.</span>
+                        </div>
+                    </div>
+
+                    <!-- Universal Video settings -->
+                    <div class="param-group">
+                        <div class="param-header">
+                            <label for="videoDurationSelect">Clip Duration</label>
+                            <span class="param-val" id="durationVal">15s</span>
+                        </div>
+                        <select id="videoDurationSelect" class="styled-select">
+                            <option value="10">10 seconds (fastest)</option>
+                            <option value="15" selected>15 seconds (recommended)</option>
+                            <option value="30">30 seconds (thorough)</option>
+                            <option value="60">60 seconds (extended)</option>
+                        </select>
+                        <span class="param-hint">Limits processing duration to prevent long waits on CPU.</span>
+                    </div>
+
+                    <div class="param-group">
+                        <div class="param-header">
+                            <label for="videoFpsSelect">Frame Sampling Rate</label>
+                            <span class="param-val" id="fpsVal">12 FPS</span>
+                        </div>
+                        <select id="videoFpsSelect" class="styled-select">
+                            <option value="6">6 FPS (Fastest analysis)</option>
+                            <option value="12" selected>12 FPS (Smooth & Balanced)</option>
+                            <option value="20">20 FPS (High-detail motion)</option>
+                        </select>
+                    </div>
+
+                    <button id="startVideoBtn" class="btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                        <span>Run Video Detection</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="results-panel">
+                <div class="metrics-bar" id="videoMetricsBar" style="display: none;">
+                    <div class="metric-item">
+                        <span class="metric-label">Detections Tracked</span>
+                        <span class="metric-value" id="videoMetricObjects">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Processed Frames</span>
+                        <span class="metric-value" id="videoMetricFrames">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Processing Time</span>
+                        <span class="metric-value" id="videoMetricTime">0s</span>
+                    </div>
+                </div>
+
+                <div class="viewer-card" id="videoViewerCard">
+                    <div class="empty-state" id="videoEmptyState">
+                        <div class="empty-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                                <polygon points="23 7 16 12 23 17 23 7"/>
+                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                            </svg>
+                        </div>
+                        <h3>No video processed yet</h3>
+                        <p>Upload a video file (.mp4, .mov, .avi, .webm) or paste a YouTube URL to run on-demand object detection or 3D Face Mesh tracking.</p>
+                    </div>
+
+                    <div class="video-progress-container" id="videoProgressContainer" style="display: none;">
+                        <div class="progress-spinner-wrap">
+                            <div class="spinner"></div>
+                        </div>
+                        <h3 id="progressTitle">Processing Video...</h3>
+                        <p id="progressStep" class="progress-step-text">Initializing task...</p>
+
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;"></div>
+                        </div>
+                        <div class="progress-stats">
+                            <span id="progressPctText">0%</span>
+                            <span id="progressFpsText"></span>
+                        </div>
+                    </div>
+
+                    <div class="display-container" id="videoDisplayContainer" style="display: none;">
+                        <div class="view-controls">
+                            <span style="font-size: 0.88rem; font-weight: 600; color: #fff;">Annotated Video Output</span>
+                            <div class="action-buttons">
+                                <a id="videoDownloadBtn" download="annotated_video.mp4" class="btn-action">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7 10 12 15 17 10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                    Download Annotated MP4
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="image-stage">
+                            <video id="annotatedVideoPlayer" controls autoplay loop playsinline style="max-width: 100%; max-height: 520px; border-radius: 6px;"></video>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-card" id="videoDetailsCard" style="display: none;">
+                    <div class="details-header">
+                        <h3>Classes Identified in Video</h3>
+                        <div class="tags-container" id="videoTagsContainer"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ================= 4. FITNESS COACH (LIVE WEBCAM) ================= -->
+        <main class="main-content" id="fitnessModeSection" style="display: none;">
+            <section class="control-panel">
+                <div class="panel-card">
+                    <h2 class="card-title">Fitness Coach &ndash; Arm Reps</h2>
+                    <p class="coach-intro">Stand so your upper body and both arms are visible. Each full cycle <strong>straight &rarr; bent &rarr; straight</strong> counts as one rep. Left and right arm are counted separately.</p>
+
+                    <div class="source-pills" id="fitSourcePills">
+                        <button type="button" class="pill-btn active" data-fsource="webcam">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="23 7 16 12 23 17 23 7"/>
+                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                            </svg>
+                            Live Webcam
+                        </button>
+                        <button type="button" class="pill-btn" data-fsource="file">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            Play Video File
+                        </button>
+                    </div>
+
+                    <div id="fitFileSection" style="display: none; margin-top: 12px;">
+                        <input type="file" id="fitFileInput" accept="video/*" class="styled-text-input">
+                        <span class="param-hint">The video is analysed live in your browser while it plays.</span>
+                    </div>
+
+                    <div class="coach-buttons">
+                        <button id="fitStartBtn" class="btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                            <span id="fitStartLabel">Start Camera</span>
+                        </button>
+                        <button id="fitResetBtn" class="btn-action" type="button">Reset Counters</button>
+                    </div>
+                </div>
+
+                <div class="panel-card">
+                    <h2 class="card-title">Coach Settings</h2>
+                    <div class="param-group">
+                        <div class="param-header">
+                            <label for="fitExtendedRange">Arm counts as straight above</label>
+                            <span id="fitExtendedVal" class="param-val">150&deg;</span>
+                        </div>
+                        <input type="range" id="fitExtendedRange" min="120" max="175" step="5" value="150" class="range-slider">
+                    </div>
+                    <div class="param-group">
+                        <div class="param-header">
+                            <label for="fitBentRange">Arm counts as bent below</label>
+                            <span id="fitBentVal" class="param-val">60&deg;</span>
+                        </div>
+                        <input type="range" id="fitBentRange" min="30" max="100" step="5" value="60" class="range-slider">
+                        <span class="param-hint">Lower the "bent" value for stricter reps (e.g. full bicep curls).</span>
+                    </div>
+                    <label class="custom-checkbox-label">
+                        <input type="checkbox" id="fitMirrorToggle" checked>
+                        Mirror view (like a gym mirror)
+                    </label>
+                    <label class="custom-checkbox-label" style="margin-top: 8px;">
+                        <input type="checkbox" id="fitSoundToggle" checked>
+                        Beep on each rep
+                    </label>
+                </div>
+            </section>
+
+            <section class="results-panel">
+                <div class="metrics-bar">
+                    <div class="metric-item">
+                        <span class="metric-label">Left Arm Reps</span>
+                        <span class="metric-value rep-left" id="fitLeftReps">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Right Arm Reps</span>
+                        <span class="metric-value rep-right" id="fitRightReps">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Total Reps</span>
+                        <span class="metric-value" id="fitTotalReps">0</span>
+                    </div>
+                </div>
+
+                <div class="viewer-card">
+                    <div class="empty-state" id="fitEmptyState">
+                        <div class="empty-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                                <path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/>
+                            </svg>
+                        </div>
+                        <h3>Coach is ready</h3>
+                        <p>Click &ldquo;Start Camera&rdquo; and allow camera access. Everything runs locally in your browser.</p>
+                    </div>
+                    <div class="fit-stage" id="fitStage" style="display: none;">
+                        <canvas id="fitCanvas"></canvas>
+                        <div class="fit-status" id="fitStatus">Loading pose model...</div>
+                    </div>
+                    <video id="fitVideo" playsinline muted style="display: none;"></video>
+                </div>
+
+                <div class="arm-cards">
+                    <div class="arm-card arm-left">
+                        <div class="arm-card-head"><span>Left Arm</span><span class="arm-state" id="fitLeftState">waiting</span></div>
+                        <div class="arm-angle" id="fitLeftAngle">&ndash;</div>
+                        <div class="angle-bar"><div class="angle-fill" id="fitLeftBar"></div></div>
+                        <p class="arm-feedback" id="fitLeftFeedback">Straighten your arm to start</p>
+                    </div>
+                    <div class="arm-card arm-right">
+                        <div class="arm-card-head"><span>Right Arm</span><span class="arm-state" id="fitRightState">waiting</span></div>
+                        <div class="arm-angle" id="fitRightAngle">&ndash;</div>
+                        <div class="angle-bar"><div class="angle-fill" id="fitRightBar"></div></div>
+                        <p class="arm-feedback" id="fitRightFeedback">Straighten your arm to start</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ================= 5. HAND GESTURES (LIVE WEBCAM) ================= -->
+        <main class="main-content" id="gestureModeSection" style="display: none;">
+            <section class="control-panel">
+                <div class="panel-card">
+                    <h2 class="card-title">Hand Gestures &ndash; Live</h2>
+                    <p class="coach-intro">Real-time MediaPipe Gesture Recognizer for <strong>up to two hands</strong>. Each hand gets its own gesture result and color-coded landmarks.</p>
+
+                    <div class="source-pills" id="gesSourcePills">
+                        <button type="button" class="pill-btn active" data-gsource="webcam">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="23 7 16 12 23 17 23 7"/>
+                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                            </svg>
+                            Live Webcam
+                        </button>
+                        <button type="button" class="pill-btn" data-gsource="file">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            Play Video File
+                        </button>
+                    </div>
+
+                    <div id="gesFileSection" style="display: none; margin-top: 12px;">
+                        <input type="file" id="gesFileInput" accept="video/*" class="styled-text-input">
+                        <span class="param-hint">The video is analysed live in your browser while it plays.</span>
+                    </div>
+
+                    <div class="coach-buttons">
+                        <button id="gesStartBtn" class="btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                            <span id="gesStartLabel">Start Camera</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-card">
+                    <h2 class="card-title">Recognition Settings</h2>
+                    <div class="param-group">
+                        <div class="param-header">
+                            <label for="gesScoreRange">Min. gesture confidence</label>
+                            <span id="gesScoreVal" class="param-val">50%</span>
+                        </div>
+                        <input type="range" id="gesScoreRange" min="0.2" max="0.9" step="0.05" value="0.5" class="range-slider">
+                        <span class="param-hint">Gestures below this score are shown as &ldquo;None&rdquo;.</span>
+                    </div>
+                    <div class="param-group">
+                        <label class="input-label" for="gesColorMode">Landmark Colors</label>
+                        <select id="gesColorMode" class="styled-select">
+                            <option value="finger" selected>Per finger (thumb, index, middle, ring, pinky)</option>
+                            <option value="hand">Per hand (left / right)</option>
+                        </select>
+                    </div>
+                    <label class="custom-checkbox-label">
+                        <input type="checkbox" id="gesMirrorToggle" checked>
+                        Mirror view (selfie)
+                    </label>
+                    <label class="custom-checkbox-label" style="margin-top: 8px;">
+                        <input type="checkbox" id="gesLabelToggle" checked>
+                        Show gesture label on hand
+                    </label>
+                </div>
+
+                <div class="panel-card">
+                    <h2 class="card-title">Recognized Gestures</h2>
+                    <div class="gesture-legend">
+                        <span>&#x1F44D; Thumb_Up</span><span>&#x1F44E; Thumb_Down</span>
+                        <span>&#x270C;&#xFE0F; Victory</span><span>&#x261D;&#xFE0F; Pointing_Up</span>
+                        <span>&#x270A; Closed_Fist</span><span>&#x270B; Open_Palm</span>
+                        <span>&#x1F91F; ILoveYou</span><span>&#x2B55; None</span>
+                    </div>
+                    <div class="finger-legend">
+                        <span style="--c:#ff4d6d">Thumb</span><span style="--c:#ffd60a">Index</span><span style="--c:#4ade80">Middle</span><span style="--c:#38bdf8">Ring</span><span style="--c:#c084fc">Pinky</span><span style="--c:#e2e8f0">Palm</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="results-panel">
+                <div class="metrics-bar">
+                    <div class="metric-item">
+                        <span class="metric-label">Hands Detected</span>
+                        <span class="metric-value" id="gesHandCount">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Two-Hand Gesture</span>
+                        <span class="metric-value metric-value-sm" id="gesCombo">&ndash;</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Inference Speed</span>
+                        <span class="metric-value" id="gesFps">0 FPS</span>
+                    </div>
+                </div>
+
+                <div class="viewer-card">
+                    <div class="empty-state" id="gesEmptyState">
+                        <div class="empty-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+                        </div>
+                        <h3>Gesture recognizer is ready</h3>
+                        <p>Click &ldquo;Start Camera&rdquo; and show one or both hands to the camera. Everything runs locally in your browser.</p>
+                    </div>
+                    <div class="fit-stage" id="gesStage" style="display: none;">
+                        <canvas id="gesCanvas" class="live-canvas"></canvas>
+                        <div class="fit-status" id="gesStatus">Loading gesture model...</div>
+                    </div>
+                    <video id="gesVideo" class="hidden-video" playsinline muted></video>
+                </div>
+
+                <div class="arm-cards">
+                    <div class="arm-card hand-card hand-left">
+                        <div class="arm-card-head"><span>Left Hand</span><span class="arm-state" id="gesLeftState">not visible</span></div>
+                        <div class="hand-gesture"><span class="hand-emoji" id="gesLeftEmoji">&ndash;</span><span id="gesLeftName">No hand</span></div>
+                        <div class="angle-bar"><div class="angle-fill" id="gesLeftBar"></div></div>
+                        <ul class="hand-topk" id="gesLeftTopk"></ul>
+                    </div>
+                    <div class="arm-card hand-card hand-right">
+                        <div class="arm-card-head"><span>Right Hand</span><span class="arm-state" id="gesRightState">not visible</span></div>
+                        <div class="hand-gesture"><span class="hand-emoji" id="gesRightEmoji">&ndash;</span><span id="gesRightName">No hand</span></div>
+                        <div class="angle-bar"><div class="angle-fill" id="gesRightBar"></div></div>
+                        <ul class="hand-topk" id="gesRightTopk"></ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ================= 6. VIRTUAL BACKGROUND (SELFIE SEGMENTATION) ================= -->
+        <main class="main-content" id="backgroundModeSection" style="display: none;">
+            <section class="control-panel">
+                <div class="panel-card">
+                    <h2 class="card-title">Virtual Background</h2>
+                    <p class="coach-intro">Video-conference selfie view using <strong>MediaPipe Image Segmentation</strong> (Selfie Segmenter). Your body is cut out live and placed in front of a new background.</p>
+
+                    <div class="source-pills" id="vbSourcePills">
+                        <button type="button" class="pill-btn active" data-vsource="webcam">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="23 7 16 12 23 17 23 7"/>
+                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                            </svg>
+                            Live Webcam
+                        </button>
+                        <button type="button" class="pill-btn" data-vsource="file">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            Play Video File
+                        </button>
+                    </div>
+
+                    <div id="vbFileSection" style="display: none; margin-top: 12px;">
+                        <input type="file" id="vbFileInput" accept="video/*" class="styled-text-input">
+                    </div>
+
+                    <div class="param-group" style="margin-top: 14px;">
+                        <label class="input-label" for="vbNameInput">Your name (shown like in a video call)</label>
+                        <input type="text" id="vbNameInput" class="styled-text-input" value="Me" maxlength="40">
+                    </div>
+
+                    <div class="coach-buttons">
+                        <button id="vbStartBtn" class="btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                            <span id="vbStartLabel">Start Camera</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-card">
+                    <h2 class="card-title">Keyboard Shortcuts</h2>
+                    <p class="param-hint" style="margin-bottom: 10px;">Press the keys while this tab is open &ndash; or click them.</p>
+                    <div class="key-group-title">Landscape photos</div>
+<div class="bg-thumbs">
+<button type="button" class="bg-thumb" data-key="1" style="background-image:url(./backgrounds/1_mountains.jpg)"><kbd>1</kbd><span>Mountains</span></button>
+<button type="button" class="bg-thumb" data-key="2" style="background-image:url(./backgrounds/2_beach.jpg)"><kbd>2</kbd><span>Beach</span></button>
+<button type="button" class="bg-thumb" data-key="3" style="background-image:url(./backgrounds/3_forest_lake.jpg)"><kbd>3</kbd><span>Forest Lake</span></button>
+<button type="button" class="bg-thumb" data-key="4" style="background-image:url(./backgrounds/4_desert.jpg)"><kbd>4</kbd><span>Desert</span></button>
+</div>
+<div class="key-group-title">Solid colors</div>
+<div class="key-grid">
+<button type="button" class="key-row" data-key="0"><kbd>0</kbd><span><i class="dot" style="--c:#000"></i>Black</span></button>
+<button type="button" class="key-row" data-key="r"><kbd>r</kbd><span><i class="dot" style="--c:#e11d48"></i>Red</span></button>
+<button type="button" class="key-row" data-key="w"><kbd>w</kbd><span><i class="dot" style="--c:#fff"></i>White</span></button>
+<button type="button" class="key-row" data-key="y"><kbd>y</kbd><span><i class="dot" style="--c:#facc15"></i>Yellow</span></button>
+<button type="button" class="key-row" data-key="g"><kbd>g</kbd><span><i class="dot" style="--c:#16a34a"></i>Green</span></button>
+</div>
+<div class="key-group-title">Effects</div>
+<div class="key-grid">
+<button type="button" class="key-row" data-key="b"><kbd>b</kbd><span>Blur (press again = stronger)</span></button>
+<button type="button" class="key-row" data-key="o"><kbd>o</kbd><span>Original background</span></button>
+</div>
+                </div>
+
+                <div class="panel-card">
+                    <h2 class="card-title">Edge Quality</h2>
+                    <div class="param-group">
+                        <div class="param-header">
+                            <label for="vbEdgeRange">Edge softness</label>
+                            <span id="vbEdgeVal" class="param-val">2px</span>
+                        </div>
+                        <input type="range" id="vbEdgeRange" min="0" max="8" step="1" value="2" class="range-slider">
+                    </div>
+                    <div class="param-group">
+                        <div class="param-header">
+                            <label for="vbCutRange">Person threshold</label>
+                            <span id="vbCutVal" class="param-val">50%</span>
+                        </div>
+                        <input type="range" id="vbCutRange" min="0.2" max="0.8" step="0.05" value="0.5" class="range-slider">
+                        <span class="param-hint">Higher = tighter cut-out around you, lower = keeps more around the edges.</span>
+                    </div>
+                    <label class="custom-checkbox-label">
+                        <input type="checkbox" id="vbMirrorToggle" checked>
+                        Mirror view (selfie)
+                    </label>
+                </div>
+            </section>
+
+            <section class="results-panel">
+                <div class="metrics-bar">
+                    <div class="metric-item">
+                        <span class="metric-label">Background</span>
+                        <span class="metric-value metric-value-sm" id="vbModeName">Original</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Blur Level</span>
+                        <span class="metric-value" id="vbBlurLevel">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Processing Speed</span>
+                        <span class="metric-value" id="vbFps">0 FPS</span>
+                    </div>
+                </div>
+
+                <div class="viewer-card">
+                    <div class="empty-state" id="vbEmptyState">
+                        <div class="empty-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="12" cy="11" r="3"/><path d="M6.5 20a5.5 5.5 0 0 1 11 0"/><path d="M2 9l4-3M22 9l-4-3"/></svg>
+                        </div>
+                        <h3>Virtual background is ready</h3>
+                        <p>Click &ldquo;Start Camera&rdquo;, then press <kbd>1</kbd>&ndash;<kbd>4</kbd>, <kbd>0</kbd> <kbd>r</kbd> <kbd>w</kbd> <kbd>y</kbd> <kbd>g</kbd> or <kbd>b</kbd>. Everything runs locally in your browser.</p>
+                    </div>
+                    <div class="fit-stage" id="vbStage" style="display: none;">
+                        <canvas id="vbCanvas" class="live-canvas"></canvas>
+                        <div class="call-overlay">
+                            <span class="call-rec"><i></i>LIVE</span>
+                            <span class="call-mode" id="vbBadge">Original</span>
+                            <span class="call-name" id="vbNameTag">Me</span>
+                        </div>
+                        <div class="call-toast" id="vbToast"></div>
+                        <div class="fit-status" id="vbStatus">Loading segmentation model...</div>
+                    </div>
+                    <video id="vbVideo" class="hidden-video" playsinline muted></video>
+                </div>
+            </section>
+        </main>
+
+        <!-- ================= 7. FACE KEYPOINTS (FACE DETECTION) ================= -->
+        <main class="main-content" id="faceKeysModeSection" style="display: none;">
+            <section class="control-panel">
+                <div class="panel-card">
+                    <h2 class="card-title">Face Keypoints &ndash; Shapes</h2>
+                    <p class="coach-intro"><strong>MediaPipe Face Detection</strong> finds every face and its 6 keypoints. Both eyes are drawn as concentric circles, the other 4 keypoints get random geometric shapes &ndash; each about the size of an eye.</p>
+
+                    <div class="source-pills" id="fkSourcePills">
+                        <button type="button" class="pill-btn active" data-fksource="webcam">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="23 7 16 12 23 17 23 7"/>
+                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                            </svg>
+                            Live Webcam
+                        </button>
+                        <button type="button" class="pill-btn" data-fksource="file">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            Play Video File
+                        </button>
+                    </div>
+
+                    <div id="fkFileSection" style="display: none; margin-top: 12px;">
+                        <input type="file" id="fkFileInput" accept="video/*" class="styled-text-input">
+                    </div>
+
+                    <div class="coach-buttons">
+                        <button id="fkStartBtn" class="btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                            <span id="fkStartLabel">Start Camera</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-card">
+                    <h2 class="card-title">Keyboard</h2>
+                    <div class="key-grid">
+                        <div class="key-row"><kbd>any</kbd><span>Shuffle shapes</span></div>
+                        <div class="key-row"><kbd>esc</kbd>&nbsp;<kbd>q</kbd><span>Exit</span></div>
+                    </div>
+                    <button id="fkShuffleBtn" class="btn-action" type="button" style="margin-top: 12px; width: 100%; justify-content: center;">Shuffle shapes now</button>
+                </div>
+
+                <div class="panel-card">
+                    <h2 class="card-title">Current Shapes</h2>
+                    <ul class="fk-legend" id="fkLegend"></ul>
+                    <div class="param-group" style="margin-top: 14px;">
+                        <div class="param-header">
+                            <label for="fkConfRange">Min. face confidence</label>
+                            <span id="fkConfVal" class="param-val">50%</span>
+                        </div>
+                        <input type="range" id="fkConfRange" min="0.2" max="0.9" step="0.05" value="0.5" class="range-slider">
+                    </div>
+                    <label class="custom-checkbox-label">
+                        <input type="checkbox" id="fkBoxToggle" checked>
+                        Show face box &amp; score
+                    </label>
+                    <label class="custom-checkbox-label" style="margin-top: 8px;">
+                        <input type="checkbox" id="fkMirrorToggle" checked>
+                        Mirror view (selfie)
+                    </label>
+                </div>
+            </section>
+
+            <section class="results-panel">
+                <div class="metrics-bar">
+                    <div class="metric-item">
+                        <span class="metric-label">Faces Detected</span>
+                        <span class="metric-value" id="fkFaceCount">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Shuffles</span>
+                        <span class="metric-value" id="fkShuffleCount">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Processing Speed</span>
+                        <span class="metric-value" id="fkFps">0 FPS</span>
+                    </div>
+                </div>
+
+                <div class="viewer-card">
+                    <div class="empty-state" id="fkEmptyState">
+                        <div class="empty-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="1.6"/><circle cx="15" cy="10" r="1.6"/><path d="M12 12.5l-1 2h2z"/><rect x="10.5" y="16" width="3" height="1.6"/></svg>
+                        </div>
+                        <h3 id="fkEmptyTitle">Face detection is ready</h3>
+                        <p id="fkEmptyText">Click &ldquo;Start Camera&rdquo;. Press any key to shuffle the shapes, <kbd>esc</kbd> or <kbd>q</kbd> to exit.</p>
+                    </div>
+                    <div class="fit-stage" id="fkStage" style="display: none;">
+                        <canvas id="fkCanvas" class="live-canvas"></canvas>
+                        <div class="call-toast" id="fkToast"></div>
+                        <div class="fit-status" id="fkStatus">Loading face detection model...</div>
+                    </div>
+                    <video id="fkVideo" class="hidden-video" playsinline muted></video>
+                </div>
+            </section>
+        </main>
+
+        <!-- ================= 8. TEACHABLE MACHINE (CUSTOM IMAGE MODEL) ================= -->
+        <main class="main-content" id="tmModeSection" style="display: none;">
+            <section class="control-panel">
+                <div class="panel-card">
+                    <h2 class="card-title">Teachable Machine &ndash; My Model</h2>
+                    <p class="coach-intro">Recognizes objects with your own <strong>Google Teachable Machine</strong> image model. Runs fully in your browser (TensorFlow.js).</p>
+
+                    <div class="param-group">
+                        <label class="input-label" for="tmUrlInput">Model URL</label>
+                        <input type="text" id="tmUrlInput" class="styled-text-input" value="https://teachablemachine.withgoogle.com/models/AGhn0w65x/">
+                    </div>
+                    <button id="tmLoadBtn" class="btn-action" type="button" style="width: 100%; justify-content: center;">Load Model</button>
+                    <p class="param-hint" id="tmModelInfo" style="margin-top: 8px;">Model not loaded yet.</p>
+                </div>
+
+                <div class="panel-card">
+                    <h2 class="card-title">Input</h2>
+                    <div class="source-pills" id="tmSourcePills">
+                        <button type="button" class="pill-btn active" data-tmsource="webcam">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="23 7 16 12 23 17 23 7"/>
+                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                            </svg>
+                            Live Webcam
+                        </button>
+                        <button type="button" class="pill-btn" data-tmsource="image">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                            Upload Image
+                        </button>
+                    </div>
+
+                    <div id="tmImageSection" style="display: none; margin-top: 12px;">
+                        <input type="file" id="tmImageInput" accept="image/*" class="styled-text-input">
+                        <span class="param-hint">Or drag &amp; drop an image onto the viewer.</span>
+                    </div>
+
+                    <div class="coach-buttons" id="tmCamButtons">
+                        <button id="tmStartBtn" class="btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                            <span id="tmStartLabel">Start Camera</span>
+                        </button>
+                    </div>
+
+                    <div class="param-group" style="margin-top: 14px;">
+                        <div class="param-header">
+                            <label for="tmConfRange">&ldquo;Unsure&rdquo; below</label>
+                            <span id="tmConfVal" class="param-val">60%</span>
+                        </div>
+                        <input type="range" id="tmConfRange" min="0.3" max="0.95" step="0.05" value="0.6" class="range-slider">
+                        <span class="param-hint">If the best class is below this confidence, the result is shown as &ldquo;Unsure&rdquo;.</span>
+                    </div>
+                    <label class="custom-checkbox-label">
+                        <input type="checkbox" id="tmMirrorToggle" checked>
+                        Mirror webcam (like Teachable Machine)
+                    </label>
+                </div>
+            </section>
+
+            <section class="results-panel">
+                <div class="metrics-bar">
+                    <div class="metric-item">
+                        <span class="metric-label">Recognized</span>
+                        <span class="metric-value metric-value-sm" id="tmTopClass">&ndash;</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Confidence</span>
+                        <span class="metric-value" id="tmTopConf">&ndash;</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Predictions / s</span>
+                        <span class="metric-value" id="tmFps">0</span>
+                    </div>
+                </div>
+
+                <div class="viewer-card" id="tmViewer">
+                    <div class="empty-state" id="tmEmptyState">
+                        <div class="empty-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.4l-4.8 2.5.9-5.4L4.2 7.7l5.4-.8z"/><path d="M5 21h14"/></svg>
+                        </div>
+                        <h3>Your Teachable Machine model</h3>
+                        <p>Start the camera and hold an object in front of it, or upload an image.</p>
+                    </div>
+                    <div class="fit-stage" id="tmStage" style="display: none;">
+                        <canvas id="tmCanvas" class="live-canvas"></canvas>
+                        <div class="call-overlay"><span class="call-mode tm-result-badge" id="tmBadge">&ndash;</span></div>
+                        <div class="fit-status" id="tmStatus">Loading model...</div>
+                    </div>
+                    <video id="tmVideo" class="hidden-video" playsinline muted></video>
+                </div>
+
+                <div class="details-card">
+                    <div class="details-header">
+                        <h3>Class Probabilities</h3>
+                    </div>
+                    <div class="tm-bars" id="tmBars"><p class="param-hint">Load the model to see its classes.</p></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="./vision-shim.js"></script>
+    <script src="./app.js"></script>
+    <script type="module" src="./fitness.js"></script>
+    <script type="module" src="./gestures.js"></script>
+    <script type="module" src="./background.js"></script>
+    <script type="module" src="./facekeys.js"></script>
+    <!-- Teachable Machine: TF.js 1.7.4 = the version the model was exported with -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.4/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.5/dist/teachablemachine-image.min.js"></script>
+    <script src="./teachable.js"></script>
+</body>
+</html>

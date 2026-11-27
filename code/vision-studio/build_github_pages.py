@@ -141,6 +141,38 @@ def build_tab_pages(projects):
         print('  built', folder)
 
 
+def build_vision_studio(projects):
+    """The complete Vision Studio (all tabs) as a static page. vision-shim.js answers the
+    /api/... requests in the browser (1.4, 1.5, 2.1, 2.2), the live tabs load their models from Google."""
+    out = os.path.join(projects, 'vision-studio')
+    asset = re.compile(r"\?v=\{\{ asset_version\('[^']+'\) \}\}")
+    page = asset.sub('', read(TEMPLATE))
+    page = replace_all(page, [
+        ('/static/css/style.css', '../assets/style.css'),
+        ('<script src="/static/js/app.js">', '<script type="module" src="./vision-shim.js"></script>\n    <script src="./app.js">'),
+        ('href="/yolo"', 'href="../yolo26-detection/"'), ('href="/cctv"', 'href="../cctv-analytics/"'),
+        ('Local MediaPipe Ready', 'Runs in your browser'),
+        ('<label for="ytUrlInput" class="input-label">Enter YouTube Link:</label>',
+         '<p class="param-hint" style="margin-bottom:8px"><b>Online version:</b> YouTube links need the local Python server. Please use &ldquo;Upload Video File&rdquo; here.</p>\n'
+         '                        <label for="ytUrlInput" class="input-label">Enter YouTube Link:</label>'),
+    ], 'index.html')
+    for js in ('fitness.js', 'gestures.js', 'background.js', 'facekeys.js', 'teachable.js'):
+        page = replace_all(page, [(f'/static/js/{js}', f'./{js}')], 'index.html')
+    page = page.replace('/static/backgrounds/', './backgrounds/')
+    leftover = re.findall(r'(?:src|href)="/(?!/)[^"]*"', page)
+    if leftover:
+        raise RuntimeError(f'vision-studio: absolute paths left: {leftover}')
+    write(os.path.join(out, 'index.html'), page)
+    for js in ('app.js', 'vision-shim.js', 'fitness.js', 'gestures.js', 'background.js', 'facekeys.js', 'teachable.js'):
+        code = read(os.path.join(SRC, 'static', 'js', js))
+        for old, new in MEDIAPIPE_MODELS.items():
+            code = code.replace(old, new)
+        code = code.replace("'/static/backgrounds/", "'./backgrounds/")
+        write(os.path.join(out, js), code)
+    shutil.copytree(os.path.join(SRC, 'static', 'backgrounds'), os.path.join(out, 'backgrounds'), dirs_exist_ok=True)
+    print('  built vision-studio')
+
+
 def build_yolo_pages(projects):
     os.makedirs(os.path.join(projects, 'models'), exist_ok=True)
     shutil.copyfile(os.path.join(SRC, 'models', 'yolo26n.onnx'), os.path.join(projects, 'models', 'yolo26n.onnx'))
@@ -194,6 +226,10 @@ def build_static_apps(projects):
 
 
 OVERVIEW = [
+    ('1.4', 'Image Object Recognition (MediaPipe)', 'vision-studio/#object'),
+    ('1.5', 'Video Object Recognition (MediaPipe)', 'vision-studio/#video'),
+    ('2.1', 'Face Landmark Detection - 3D Face Mesh (image)', 'vision-studio/#facemesh'),
+    ('2.2', 'Video Face Landmark Detection - 3D Face Mesh (video)', 'vision-studio/#video-facemesh'),
     ('2.3', 'Fitness Coach (MediaPipe Pose)', 'fitness-coach/'),
     ('2.4', 'Hand Gestures (MediaPipe Gesture Recognizer)', 'hand-gestures/'),
     ('2.5', 'Virtual Background (MediaPipe Image Segmentation)', 'virtual-background/'),
@@ -232,7 +268,8 @@ def build_overview(projects):
     <ul>
 {rows}
     </ul>
-    <p>Python (Flask) projects for 1.4, 1.5, 2.1, 2.2 and 3.4 run locally only &ndash; source code:
+    <p>1.4&ndash;2.2 open the complete <a href="vision-studio/">Vision Studio</a> (the online version computes everything in the browser).
+      The Gemini chat (3.4) needs a private API key and runs on the local Python server only &ndash; source code:
       <a href="https://github.com/324033/324033.github.io/tree/main/code/vision-studio">code/vision-studio</a>.</p>
     <p><a href="../">&larr; Back to my homepage</a></p>
   </main>
@@ -289,6 +326,7 @@ def main():
     os.makedirs(os.path.join(projects, 'assets'), exist_ok=True)
     shutil.copyfile(os.path.join(SRC, 'static', 'css', 'style.css'), os.path.join(projects, 'assets', 'style.css'))
     build_tab_pages(projects)
+    build_vision_studio(projects)
     build_yolo_pages(projects)
     build_static_apps(projects)
     build_overview(projects)

@@ -1,2 +1,2 @@
 Video Face landmark detection
-https://github.com/324033/324033.github.io/tree/main/code/vision-studio
+https://324033.github.io/projects/vision-studio/#video-facemesh
