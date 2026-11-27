@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Style Transfer</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./style-transfer.css">
+</head>
+<body>
+<div class="app">
+    <header class="top">
+        <div class="brand">
+            <div class="logo nst-logo" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.5-.9 1.5-1.6 0-.9-.7-1.4-.7-2.2 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5c0-4.1-4-7.6-9-7.6z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7" r="1.2"/><circle cx="15.5" cy="7.5" r="1.2"/></svg>
+            </div>
+            <div>
+                <h1>Neural Style Transfer</h1>
+                <p>Fast neural style models &middot; ONNX Runtime Web (WASM) in a Web Worker &middot; nothing is uploaded</p>
+            </div>
+        </div>
+        <div class="status-row">
+            <a class="nav-link" href="./index.html">&#x2190; YOLO26 Webcam Tasks</a>
+            <div class="chip"><span>Engine</span><b id="nEngine">starting...</b></div>
+            <div class="chip"><span>Done</span><b id="nDone">0 / 0</b></div>
+        </div>
+    </header>
+
+    <main class="layout">
+        <aside class="panel">
+            <label class="lbl">1 &middot; Your photo</label>
+            <label class="drop" id="drop" for="nFile">
+                <input type="file" id="nFile" accept="image/*">
+                <img id="nPreview" alt="Your photo" hidden>
+                <span id="nDropText"><b>Click to choose a photo</b><br>or drag &amp; drop / paste it here</span>
+            </label>
+
+            <label class="lbl" for="nQuality">2 &middot; Size (longest side)</label>
+            <select id="nQuality">
+                <option value="256" selected>256 px &middot; fast (default)</option>
+                <option value="384">384 px</option>
+                <option value="512">512 px &middot; better quality</option>
+                <option value="768">768 px &middot; slow on older laptops</option>
+                <option value="1024">1024 px &middot; needs a fast computer</option>
+            </select>
+
+            <button id="nRunAll" class="primary" type="button" disabled>&#x1F3A8; Convert all styles</button>
+            <p class="hint">Or click a single style thumbnail on the right.</p>
+
+            <div class="range-head"><label class="lbl" for="nStrength">Style strength</label><span id="nStrengthVal">100%</span></div>
+            <input type="range" id="nStrength" min="0" max="1" step="0.05" value="1">
+            <p class="hint">Blends the artwork with your photo &ndash; instant, no re-run.</p>
+
+            <div class="note">
+                <b>Licence note:</b> The style models are free for <b>personal or research use</b> only.
+                Ask the original authors before using them commercially.
+                <a href="#credits">Model sources &darr;</a>
+            </div>
+        </aside>
+
+        <section class="stage-wrap">
+            <div class="error" id="nError" role="alert" hidden></div>
+            <div class="processing" id="nProcessing" hidden><div class="spinner"></div><span id="nProcessingText">Processing...</span></div>
+
+            <div class="details-box">
+                <h2 class="sec-title">Styles <small>click one to convert just that style</small></h2>
+                <div class="thumbs" id="nThumbs"></div>
+            </div>
+
+            <div class="gallery" id="nGallery">
+                <div class="empty">
+                    <h2>Upload a photo to start</h2>
+                    <p>Then click &ldquo;Convert all styles&rdquo; &ndash; every result appears next to your original.</p>
+                </div>
+            </div>
+
+            <div class="details-box credits" id="credits">
+                <h2 class="sec-title">Model sources</h2>
+                <p id="nCredits"></p>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script type="module" src="./style-transfer.js"></script>
+</body>
+</html>

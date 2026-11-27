@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Keypoints</title>
+    <link rel="stylesheet" href="../assets/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
+                </div>
+                <div>
+                    <h1>Face Keypoints</h1>
+                    <p class="subtitle">Assignment 2.6 &bull; MediaPipe Face Detection - any key shuffles the shapes, Esc / q exits</p>
+                </div>
+            </div>
+            <div class="header-nav">
+                <a class="nav-tab nav-tab-link" href="../">&#x2190; All projects</a>
+            </div>
+            <div class="header-status">
+                <span class="status-dot"></span>
+                <span class="status-text">Runs in your browser</span>
+            </div>
+        </header>
+        <main class="main-content" id="faceKeysModeSection" style="display: grid;">
+            <section class="control-panel">
+                <div class="panel-card">
+                    <h2 class="card-title">Face Keypoints &ndash; Shapes</h2>
+                    <p class="coach-intro"><strong>MediaPipe Face Detection</strong> finds every face and its 6 keypoints. Both eyes are drawn as concentric circles, the other 4 keypoints get random geometric shapes &ndash; each about the size of an eye.</p>
+
+                    <div class="source-pills" id="fkSourcePills">
+                        <button type="button" class="pill-btn active" data-fksource="webcam">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="23 7 16 12 23 17 23 7"/>
+                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                            </svg>
+                            Live Webcam
+                        </button>
+                        <button type="button" class="pill-btn" data-fksource="file">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            Play Video File
+                        </button>
+                    </div>
+
+                    <div id="fkFileSection" style="display: none; margin-top: 12px;">
+                        <input type="file" id="fkFileInput" accept="video/*" class="styled-text-input">
+                    </div>
+
+                    <div class="coach-buttons">
+                        <button id="fkStartBtn" class="btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                            <span id="fkStartLabel">Start Camera</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-card">
+                    <h2 class="card-title">Keyboard</h2>
+                    <div class="key-grid">
+                        <div class="key-row"><kbd>any</kbd><span>Shuffle shapes</span></div>
+                        <div class="key-row"><kbd>esc</kbd>&nbsp;<kbd>q</kbd><span>Exit</span></div>
+                    </div>
+                    <button id="fkShuffleBtn" class="btn-action" type="button" style="margin-top: 12px; width: 100%; justify-content: center;">Shuffle shapes now</button>
+                </div>
+
+                <div class="panel-card">
+                    <h2 class="card-title">Current Shapes</h2>
+                    <ul class="fk-legend" id="fkLegend"></ul>
+                    <div class="param-group" style="margin-top: 14px;">
+                        <div class="param-header">
+                            <label for="fkConfRange">Min. face confidence</label>
+                            <span id="fkConfVal" class="param-val">50%</span>
+                        </div>
+                        <input type="range" id="fkConfRange" min="0.2" max="0.9" step="0.05" value="0.5" class="range-slider">
+                    </div>
+                    <label class="custom-checkbox-label">
+                        <input type="checkbox" id="fkBoxToggle" checked>
+                        Show face box &amp; score
+                    </label>
+                    <label class="custom-checkbox-label" style="margin-top: 8px;">
+                        <input type="checkbox" id="fkMirrorToggle" checked>
+                        Mirror view (selfie)
+                    </label>
+                </div>
+            </section>
+
+            <section class="results-panel">
+                <div class="metrics-bar">
+                    <div class="metric-item">
+                        <span class="metric-label">Faces Detected</span>
+                        <span class="metric-value" id="fkFaceCount">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Shuffles</span>
+                        <span class="metric-value" id="fkShuffleCount">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Processing Speed</span>
+                        <span class="metric-value" id="fkFps">0 FPS</span>
+                    </div>
+                </div>
+
+                <div class="viewer-card">
+                    <div class="empty-state" id="fkEmptyState">
+                        <div class="empty-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="1.6"/><circle cx="15" cy="10" r="1.6"/><path d="M12 12.5l-1 2h2z"/><rect x="10.5" y="16" width="3" height="1.6"/></svg>
+                        </div>
+                        <h3 id="fkEmptyTitle">Face detection is ready</h3>
+                        <p id="fkEmptyText">Click &ldquo;Start Camera&rdquo;. Press any key to shuffle the shapes, <kbd>esc</kbd> or <kbd>q</kbd> to exit.</p>
+                    </div>
+                    <div class="fit-stage" id="fkStage" style="display: none;">
+                        <canvas id="fkCanvas" class="live-canvas"></canvas>
+                        <div class="call-toast" id="fkToast"></div>
+                        <div class="fit-status" id="fkStatus">Loading face detection model...</div>
+                    </div>
+                    <video id="fkVideo" class="hidden-video" playsinline muted></video>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script type="module" src="./app.js"></script>
+</body>
+</html>

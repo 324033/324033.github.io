@@ -1,0 +1,2 @@
+Extra Credit 3-8: YOLO26 webcam tasks (7 models)
+https://324033.github.io/projects/yolo26-tasks/

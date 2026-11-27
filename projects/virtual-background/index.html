@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Background</title>
+    <link rel="stylesheet" href="../assets/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
+                </div>
+                <div>
+                    <h1>Virtual Background</h1>
+                    <p class="subtitle">Assignment 2.5 &bull; MediaPipe Image Segmentation - keys 1-4, 0 r w y g, b = blur</p>
+                </div>
+            </div>
+            <div class="header-nav">
+                <a class="nav-tab nav-tab-link" href="../">&#x2190; All projects</a>
+            </div>
+            <div class="header-status">
+                <span class="status-dot"></span>
+                <span class="status-text">Runs in your browser</span>
+            </div>
+        </header>
+        <main class="main-content" id="backgroundModeSection" style="display: grid;">
+            <section class="control-panel">
+                <div class="panel-card">
+                    <h2 class="card-title">Virtual Background</h2>
+                    <p class="coach-intro">Video-conference selfie view using <strong>MediaPipe Image Segmentation</strong> (Selfie Segmenter). Your body is cut out live and placed in front of a new background.</p>
+
+                    <div class="source-pills" id="vbSourcePills">
+                        <button type="button" class="pill-btn active" data-vsource="webcam">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="23 7 16 12 23 17 23 7"/>
+                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                            </svg>
+                            Live Webcam
+                        </button>
+                        <button type="button" class="pill-btn" data-vsource="file">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            Play Video File
+                        </button>
+                    </div>
+
+                    <div id="vbFileSection" style="display: none; margin-top: 12px;">
+                        <input type="file" id="vbFileInput" accept="video/*" class="styled-text-input">
+                    </div>
+
+                    <div class="param-group" style="margin-top: 14px;">
+                        <label class="input-label" for="vbNameInput">Your name (shown like in a video call)</label>
+                        <input type="text" id="vbNameInput" class="styled-text-input" value="Me" maxlength="40">
+                    </div>
+
+                    <div class="coach-buttons">
+                        <button id="vbStartBtn" class="btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                            <span id="vbStartLabel">Start Camera</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-card">
+                    <h2 class="card-title">Keyboard Shortcuts</h2>
+                    <p class="param-hint" style="margin-bottom: 10px;">Press the keys while this tab is open &ndash; or click them.</p>
+                    <div class="key-group-title">Landscape photos</div>
+<div class="bg-thumbs">
+<button type="button" class="bg-thumb" data-key="1" style="background-image:url(./backgrounds/1_mountains.jpg)"><kbd>1</kbd><span>Mountains</span></button>
+<button type="button" class="bg-thumb" data-key="2" style="background-image:url(./backgrounds/2_beach.jpg)"><kbd>2</kbd><span>Beach</span></button>
+<button type="button" class="bg-thumb" data-key="3" style="background-image:url(./backgrounds/3_forest_lake.jpg)"><kbd>3</kbd><span>Forest Lake</span></button>
+<button type="button" class="bg-thumb" data-key="4" style="background-image:url(./backgrounds/4_desert.jpg)"><kbd>4</kbd><span>Desert</span></button>
+</div>
+<div class="key-group-title">Solid colors</div>
+<div class="key-grid">
+<button type="button" class="key-row" data-key="0"><kbd>0</kbd><span><i class="dot" style="--c:#000"></i>Black</span></button>
+<button type="button" class="key-row" data-key="r"><kbd>r</kbd><span><i class="dot" style="--c:#e11d48"></i>Red</span></button>
+<button type="button" class="key-row" data-key="w"><kbd>w</kbd><span><i class="dot" style="--c:#fff"></i>White</span></button>
+<button type="button" class="key-row" data-key="y"><kbd>y</kbd><span><i class="dot" style="--c:#facc15"></i>Yellow</span></button>
+<button type="button" class="key-row" data-key="g"><kbd>g</kbd><span><i class="dot" style="--c:#16a34a"></i>Green</span></button>
+</div>
+<div class="key-group-title">Effects</div>
+<div class="key-grid">
+<button type="button" class="key-row" data-key="b"><kbd>b</kbd><span>Blur (press again = stronger)</span></button>
+<button type="button" class="key-row" data-key="o"><kbd>o</kbd><span>Original background</span></button>
+</div>
+                </div>
+
+                <div class="panel-card">
+                    <h2 class="card-title">Edge Quality</h2>
+                    <div class="param-group">
+                        <div class="param-header">
+                            <label for="vbEdgeRange">Edge softness</label>
+                            <span id="vbEdgeVal" class="param-val">2px</span>
+                        </div>
+                        <input type="range" id="vbEdgeRange" min="0" max="8" step="1" value="2" class="range-slider">
+                    </div>
+                    <div class="param-group">
+                        <div class="param-header">
+                            <label for="vbCutRange">Person threshold</label>
+                            <span id="vbCutVal" class="param-val">50%</span>
+                        </div>
+                        <input type="range" id="vbCutRange" min="0.2" max="0.8" step="0.05" value="0.5" class="range-slider">
+                        <span class="param-hint">Higher = tighter cut-out around you, lower = keeps more around the edges.</span>
+                    </div>
+                    <label class="custom-checkbox-label">
+                        <input type="checkbox" id="vbMirrorToggle" checked>
+                        Mirror view (selfie)
+                    </label>
+                </div>
+            </section>
+
+            <section class="results-panel">
+                <div class="metrics-bar">
+                    <div class="metric-item">
+                        <span class="metric-label">Background</span>
+                        <span class="metric-value metric-value-sm" id="vbModeName">Original</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Blur Level</span>
+                        <span class="metric-value" id="vbBlurLevel">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Processing Speed</span>
+                        <span class="metric-value" id="vbFps">0 FPS</span>
+                    </div>
+                </div>
+
+                <div class="viewer-card">
+                    <div class="empty-state" id="vbEmptyState">
+                        <div class="empty-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="12" cy="11" r="3"/><path d="M6.5 20a5.5 5.5 0 0 1 11 0"/><path d="M2 9l4-3M22 9l-4-3"/></svg>
+                        </div>
+                        <h3>Virtual background is ready</h3>
+                        <p>Click &ldquo;Start Camera&rdquo;, then press <kbd>1</kbd>&ndash;<kbd>4</kbd>, <kbd>0</kbd> <kbd>r</kbd> <kbd>w</kbd> <kbd>y</kbd> <kbd>g</kbd> or <kbd>b</kbd>. Everything runs locally in your browser.</p>
+                    </div>
+                    <div class="fit-stage" id="vbStage" style="display: none;">
+                        <canvas id="vbCanvas" class="live-canvas"></canvas>
+                        <div class="call-overlay">
+                            <span class="call-rec"><i></i>LIVE</span>
+                            <span class="call-mode" id="vbBadge">Original</span>
+                            <span class="call-name" id="vbNameTag">Me</span>
+                        </div>
+                        <div class="call-toast" id="vbToast"></div>
+                        <div class="fit-status" id="vbStatus">Loading segmentation model...</div>
+                    </div>
+                    <video id="vbVideo" class="hidden-video" playsinline muted></video>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script type="module" src="./app.js"></script>
+</body>
+</html>

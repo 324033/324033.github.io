@@ -1,2 +1,2 @@
 Teachable Machine Object Classifier
-https://drluarn.github.io/
+https://324033.github.io/projects/teachable-machine/

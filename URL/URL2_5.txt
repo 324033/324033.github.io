@@ -1,2 +1,2 @@
 Image Segmentation
-https://drluarn.github.io/
+https://324033.github.io/projects/virtual-background/

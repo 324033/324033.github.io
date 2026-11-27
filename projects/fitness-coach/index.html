@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Coach</title>
+    <link rel="stylesheet" href="../assets/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
+                </div>
+                <div>
+                    <h1>Fitness Coach</h1>
+                    <p class="subtitle">Assignment 2.3 &bull; MediaPipe Pose - counts arm reps (left / right) live from the webcam</p>
+                </div>
+            </div>
+            <div class="header-nav">
+                <a class="nav-tab nav-tab-link" href="../">&#x2190; All projects</a>
+            </div>
+            <div class="header-status">
+                <span class="status-dot"></span>
+                <span class="status-text">Runs in your browser</span>
+            </div>
+        </header>
+        <main class="main-content" id="fitnessModeSection" style="display: grid;">
+            <section class="control-panel">
+                <div class="panel-card">
+                    <h2 class="card-title">Fitness Coach &ndash; Arm Reps</h2>
+                    <p class="coach-intro">Stand so your upper body and both arms are visible. Each full cycle <strong>straight &rarr; bent &rarr; straight</strong> counts as one rep. Left and right arm are counted separately.</p>
+
+                    <div class="source-pills" id="fitSourcePills">
+                        <button type="button" class="pill-btn active" data-fsource="webcam">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="23 7 16 12 23 17 23 7"/>
+                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                            </svg>
+                            Live Webcam
+                        </button>
+                        <button type="button" class="pill-btn" data-fsource="file">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            Play Video File
+                        </button>
+                    </div>
+
+                    <div id="fitFileSection" style="display: none; margin-top: 12px;">
+                        <input type="file" id="fitFileInput" accept="video/*" class="styled-text-input">
+                        <span class="param-hint">The video is analysed live in your browser while it plays.</span>
+                    </div>
+
+                    <div class="coach-buttons">
+                        <button id="fitStartBtn" class="btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                            <span id="fitStartLabel">Start Camera</span>
+                        </button>
+                        <button id="fitResetBtn" class="btn-action" type="button">Reset Counters</button>
+                    </div>
+                </div>
+
+                <div class="panel-card">
+                    <h2 class="card-title">Coach Settings</h2>
+                    <div class="param-group">
+                        <div class="param-header">
+                            <label for="fitExtendedRange">Arm counts as straight above</label>
+                            <span id="fitExtendedVal" class="param-val">150&deg;</span>
+                        </div>
+                        <input type="range" id="fitExtendedRange" min="120" max="175" step="5" value="150" class="range-slider">
+                    </div>
+                    <div class="param-group">
+                        <div class="param-header">
+                            <label for="fitBentRange">Arm counts as bent below</label>
+                            <span id="fitBentVal" class="param-val">60&deg;</span>
+                        </div>
+                        <input type="range" id="fitBentRange" min="30" max="100" step="5" value="60" class="range-slider">
+                        <span class="param-hint">Lower the "bent" value for stricter reps (e.g. full bicep curls).</span>
+                    </div>
+                    <label class="custom-checkbox-label">
+                        <input type="checkbox" id="fitMirrorToggle" checked>
+                        Mirror view (like a gym mirror)
+                    </label>
+                    <label class="custom-checkbox-label" style="margin-top: 8px;">
+                        <input type="checkbox" id="fitSoundToggle" checked>
+                        Beep on each rep
+                    </label>
+                </div>
+            </section>
+
+            <section class="results-panel">
+                <div class="metrics-bar">
+                    <div class="metric-item">
+                        <span class="metric-label">Left Arm Reps</span>
+                        <span class="metric-value rep-left" id="fitLeftReps">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Right Arm Reps</span>
+                        <span class="metric-value rep-right" id="fitRightReps">0</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Total Reps</span>
+                        <span class="metric-value" id="fitTotalReps">0</span>
+                    </div>
+                </div>
+
+                <div class="viewer-card">
+                    <div class="empty-state" id="fitEmptyState">
+                        <div class="empty-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                                <path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/>
+                            </svg>
+                        </div>
+                        <h3>Coach is ready</h3>
+                        <p>Click &ldquo;Start Camera&rdquo; and allow camera access. Everything runs locally in your browser.</p>
+                    </div>
+                    <div class="fit-stage" id="fitStage" style="display: none;">
+                        <canvas id="fitCanvas"></canvas>
+                        <div class="fit-status" id="fitStatus">Loading pose model...</div>
+                    </div>
+                    <video id="fitVideo" playsinline muted style="display: none;"></video>
+                </div>
+
+                <div class="arm-cards">
+                    <div class="arm-card arm-left">
+                        <div class="arm-card-head"><span>Left Arm</span><span class="arm-state" id="fitLeftState">waiting</span></div>
+                        <div class="arm-angle" id="fitLeftAngle">&ndash;</div>
+                        <div class="angle-bar"><div class="angle-fill" id="fitLeftBar"></div></div>
+                        <p class="arm-feedback" id="fitLeftFeedback">Straighten your arm to start</p>
+                    </div>
+                    <div class="arm-card arm-right">
+                        <div class="arm-card-head"><span>Right Arm</span><span class="arm-state" id="fitRightState">waiting</span></div>
+                        <div class="arm-angle" id="fitRightAngle">&ndash;</div>
+                        <div class="angle-bar"><div class="angle-fill" id="fitRightBar"></div></div>
+                        <p class="arm-feedback" id="fitRightFeedback">Straighten your arm to start</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script type="module" src="./app.js"></script>
+</body>
+</html>

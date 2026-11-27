@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLO26 Live Detection</title>
+    <link rel="stylesheet" href="/static/css/style.css?v={{ asset_version('css/style.css') }}">
+    <link rel="stylesheet" href="/static/css/yolo.css?v={{ asset_version('css/yolo.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <div class="header-left">
+            <div class="logo-icon yolo-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="5" width="8" height="8" rx="1"/>
+                    <rect x="13" y="11" width="8" height="8" rx="1"/>
+                    <path d="M3 3h3M18 21h3M3 3v3M21 21v-3"/>
+                </svg>
+            </div>
+            <div>
+                <h1>YOLO26 Live Detection</h1>
+                <p class="subtitle">Ultralytics YOLO26n running in your browser (ONNX Runtime Web) &bull; CCTV &bull; YouTube &bull; Webcam &bull; Files</p>
+            </div>
+        </div>
+        <div class="header-nav">
+            <a class="nav-tab nav-tab-link" href="/">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                Back to Vision Studio
+            </a>
+            <a class="nav-tab nav-tab-link" href="/cctv" title="Vehicle counting, heatmap and speed estimation">&#x1F697; CCTV Traffic Analytics &#x2197;</a>
+        </div>
+        <div class="header-status">
+            <span class="status-dot" id="yStatusDot"></span>
+            <span class="status-text" id="yModelStatus">Loading YOLO26n...</span>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="control-panel">
+            <!-- SOURCE -->
+            <div class="panel-card">
+                <h2 class="card-title">Video Source</h2>
+                <div class="source-pills y-source-pills" id="ySourcePills">
+                    <button type="button" class="pill-btn active" data-ysource="cctv">&#x1F4F9; CCTV</button>
+                    <button type="button" class="pill-btn" data-ysource="youtube">&#x25B6;&#xFE0F; YouTube</button>
+                    <button type="button" class="pill-btn" data-ysource="webcam">&#x1F3A5; Webcam</button>
+                    <button type="button" class="pill-btn" data-ysource="file">&#x1F4C1; File</button>
+                </div>
+
+                <div class="y-source-panel" data-panel="cctv">
+                    <label class="input-label" for="yCctvUrl">Live CCTV stream (MJPEG)</label>
+                    <input type="text" id="yCctvUrl" class="styled-text-input" value="https://cctv.klcg.gov.tw/facd4662">
+                    <span class="param-hint">Keelung City traffic camera &ndash; about 1 new frame per second.</span>
+                    <button class="btn-primary y-go" id="yCctvBtn">Connect &amp; Detect</button>
+                </div>
+
+                <div class="y-source-panel" data-panel="youtube" hidden>
+                    <label class="input-label" for="yYtUrl">YouTube link (e.g. a sports video)</label>
+                    <input type="text" id="yYtUrl" class="styled-text-input" placeholder="https://www.youtube.com/watch?v=...">
+                    <div class="y-row">
+                        <label class="input-label" for="yYtDuration" style="margin:0">Clip length</label>
+                        <select id="yYtDuration" class="styled-select y-small-select">
+                            <option value="15">15 s</option>
+                            <option value="30" selected>30 s</option>
+                            <option value="60">60 s</option>
+                            <option value="120">120 s</option>
+                        </select>
+                    </div>
+                    <div class="sample-buttons" id="yYtSamples">
+                        <button type="button" class="btn-sample-yt" data-url="https://www.youtube.com/watch?v=j8BxnOqoKG8">&#x26BD; Beach Soccer (FIFA)</button>
+                        <button type="button" class="btn-sample-yt" data-url="https://www.youtube.com/watch?v=qGMnAUK11SA">&#x1F3BE; Tennis (Tennis TV)</button>
+                    </div>
+                    <span class="param-hint">The beginning of the video is downloaded locally first, so the browser may analyse its frames.</span>
+                    <button class="btn-primary y-go" id="yYtBtn">Load &amp; Detect</button>
+                </div>
+
+                <div class="y-source-panel" data-panel="webcam" hidden>
+                    <span class="param-hint">Uses your camera &ndash; nothing leaves your computer.</span>
+                    <button class="btn-primary y-go" id="yCamBtn">Start Camera</button>
+                </div>
+
+                <div class="y-source-panel" data-panel="file" hidden>
+                    <input type="file" id="yFileInput" accept="video/*,image/*" class="styled-text-input">
+                    <span class="param-hint">Video or image &ndash; or drag &amp; drop it onto the viewer.</span>
+                </div>
+            </div>
+
+            <!-- SETTINGS -->
+            <div class="panel-card">
+                <h2 class="card-title">Detection Settings</h2>
+                <div class="param-group">
+                    <div class="param-header">
+                        <label for="yConfRange">Confidence threshold</label>
+                        <span id="yConfVal" class="param-val">35%</span>
+                    </div>
+                    <input type="range" id="yConfRange" min="0.1" max="0.9" step="0.05" value="0.35" class="range-slider">
+                </div>
+                <div class="param-group">
+                    <label class="input-label" for="yPreset">Show classes</label>
+                    <select id="yPreset" class="styled-select">
+                        <option value="all" selected>All 80 COCO classes</option>
+                        <option value="people">People only</option>
+                        <option value="vehicles">Vehicles (car, bus, truck, motorcycle, bicycle&hellip;)</option>
+                        <option value="sports">Sports (person, ball, racket, bat&hellip;)</option>
+                        <option value="animals">Animals</option>
+                    </select>
+                    <span class="param-hint">Tip: click a class in &ldquo;Live Counts&rdquo; to hide or show it.</span>
+                </div>
+                <label class="custom-checkbox-label"><input type="checkbox" id="yLabels" checked> Show labels &amp; confidence</label>
+                <label class="custom-checkbox-label" style="margin-top:8px"><input type="checkbox" id="yMirror"> Mirror view (webcam)</label>
+
+                <div class="y-tools">
+                    <button class="btn-action" id="yPauseBtn" type="button" disabled>&#x23F8; Pause</button>
+                    <button class="btn-action" id="ySnapBtn" type="button" disabled>&#x1F4F7; Snapshot</button>
+                    <button class="btn-action" id="yResetBtn" type="button">&#x21BA; Reset stats</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="results-panel">
+            <div class="metrics-bar y-metrics">
+                <div class="metric-item">
+                    <span class="metric-label">Objects now</span>
+                    <span class="metric-value" id="yObjCount">0</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Detection FPS</span>
+                    <span class="metric-value" id="yFps">0</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Inference</span>
+                    <span class="metric-value" id="yInfer">&ndash;</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Backend</span>
+                    <span class="metric-value metric-value-sm" id="yBackend">&ndash;</span>
+                </div>
+            </div>
+
+            <div class="viewer-card" id="yViewer">
+                <div class="empty-state" id="yEmpty">
+                    <div class="empty-icon">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                            <rect x="3" y="5" width="8" height="8" rx="1"/><rect x="13" y="11" width="8" height="8" rx="1"/>
+                        </svg>
+                    </div>
+                    <h3>Choose a source to start</h3>
+                    <p>The live CCTV camera is preselected &ndash; just click &ldquo;Connect &amp; Detect&rdquo;.</p>
+                </div>
+                <div class="fit-stage" id="yStage" hidden>
+                    <canvas id="yCanvas" class="live-canvas"></canvas>
+                    <div class="call-overlay">
+                        <span class="call-rec" id="yLiveBadge"><i></i><b id="ySourceLabel">LIVE</b></span>
+                    </div>
+                    <div class="fit-status" id="yStatus" hidden></div>
+                </div>
+                <video id="yVideo" class="hidden-video" playsinline muted></video>
+                <img id="yImg" class="hidden-video" alt="">
+            </div>
+
+            <div class="y-bottom">
+                <div class="details-card">
+                    <div class="details-header">
+                        <h3>Live Counts</h3>
+                        <span class="param-hint">now &middot; peak</span>
+                    </div>
+                    <div class="y-counts" id="yCounts"><p class="param-hint">No detections yet.</p></div>
+                </div>
+                <div class="details-card">
+                    <div class="details-header">
+                        <h3>Objects over time</h3>
+                        <span class="param-hint" id="yHistInfo">last 60 s</span>
+                    </div>
+                    <canvas id="yChart" class="y-chart" height="140"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- ONNX Runtime Web (WebGPU with WebAssembly fallback) -->
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.webgpu.min.js"></script>
+<script src="/static/js/yolo.js?v={{ asset_version('js/yolo.js') }}"></script>
+</body>
+</html>

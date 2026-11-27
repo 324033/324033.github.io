@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pforzheim AI Course Islands</title>
+<meta name="description" content="Interactive 3D map of the Pforzheim AI course: six islands, one per unit.">
+<!-- Rounded, friendly font (falls back to system fonts when offline) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<!--
+  =====================================================================
+  PFORZHEIM AI COURSE ISLANDS  -  single self-contained HTML file
+  ---------------------------------------------------------------------
+  Open it directly in a browser (double-click). Three.js is loaded from
+  the jsDelivr CDN, so an internet connection is needed on first load.
+
+  Where to customise:
+    * Island names, units, lessons, activities  -> ISLANDS array (JS, "1. COURSE DATA")
+    * Island colours                           -> "color" / "accent" in ISLANDS
+    * Page colours / fonts                     -> CSS variables in :root
+    * Background music (scale, tempo, sound)   -> "6. AMBIENT MUSIC" section
+  =====================================================================
+-->
+
+<style>
+/* ===================== 0. THEME (edit colours here) ===================== */
+:root {
+  --sky-top: #c9dcff;
+  --sky-bottom: #fde4ef;
+  --ink: #23304a;            /* main text - dark enough for good contrast */
+  --ink-soft: #4b5873;
+  --card: rgba(255, 255, 255, 0.92);
+  --card-solid: #ffffff;
+  --line: #d9e0ee;
+  --accent: #6c7cf0;
+  --accent-soft: #e6e9ff;
+  --ok: #2f8f63;
+  --ok-bg: #e3f6ec;
+  --warn: #9a5b00;
+  --warn-bg: #fff2dc;
+  --radius: 18px;
+  --shadow: 0 10px 30px rgba(60, 72, 120, 0.15);
+  --font: "Nunito", "Segoe UI Rounded", "SF Pro Rounded", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --text-size: 16px;
+  --letter: 0;
+  --panel-w: min(440px, 42vw);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }   /* "hidden" always wins over display rules below */
+html, body { margin: 0; height: 100%; }
+body {
+  font-family: var(--font);
+  font-size: var(--text-size);
+  letter-spacing: var(--letter);
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+  overflow: hidden;
+}
+
+/* calm, readable focus outline everywhere */
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 8px; }
+
+button, input, select, textarea { font: inherit; letter-spacing: inherit; color: inherit; }
+button { cursor: pointer; }
+
+.skip-link {
+  position: absolute; left: 12px; top: -60px; z-index: 100;
+  background: var(--card-solid); padding: 10px 16px; border-radius: 12px; box-shadow: var(--shadow);
+  color: var(--ink); font-weight: 700; text-decoration: none; transition: top 0.2s;
+}
+.skip-link:focus { top: 12px; }
+
+/* ===================== 1. TOP BAR ===================== */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 12px 18px; pointer-events: none;
+}
+.topbar > * { pointer-events: auto; }
+.title {
+  background: var(--card); border-radius: var(--radius); padding: 10px 18px; box-shadow: var(--shadow);
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+}
+.title h1 { margin: 0; font-size: 1.35rem; font-weight: 800; }
+.title .by { font-size: 0.92rem; color: var(--ink-soft); font-weight: 600; }
+
+.controls {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  background: var(--card); border-radius: var(--radius); padding: 8px 10px; box-shadow: var(--shadow);
+}
+.btn {
+  border: 2px solid var(--line); background: var(--card-solid); border-radius: 999px;
+  padding: 7px 14px; font-weight: 700; font-size: 0.92rem; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:hover { border-color: var(--accent); }
+.btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.vol { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--ink-soft); font-weight: 600; }
+.vol input { width: 90px; accent-color: var(--accent); }
+
+/* switch-style toggle for low-stimulation mode */
+.switch { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.92rem; cursor: pointer; padding: 4px 6px; }
+.switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.switch .track { width: 42px; height: 24px; border-radius: 999px; background: var(--line); position: relative; transition: background 0.2s; flex: none; }
+.switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: left 0.2s; }
+.switch input:checked + .track { background: var(--accent); }
+.switch input:checked + .track::after { left: 21px; }
+.switch input:focus-visible + .track { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* ===================== 2. 3D SCENE + LABELS ===================== */
+#scene { position: fixed; inset: 0; }
+#scene canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+
+.labels { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+.island-label {
+  position: absolute; left: 0; top: 0; pointer-events: auto;
+  transform: translate(-50%, -100%);
+  background: var(--card-solid); border: 2px solid transparent; border-radius: 999px;
+  padding: 6px 14px; font-weight: 800; font-size: 0.95rem; color: var(--ink);
+  box-shadow: 0 6px 16px rgba(60, 72, 120, 0.18); white-space: nowrap;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.island-label .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; background: var(--c); }
+.island-label small { font-weight: 600; color: var(--ink-soft); margin-left: 4px; }
+/* soft glow for hover / keyboard focus (no flashing) */
+.island-label.hot, .island-label:focus-visible { border-color: var(--c); box-shadow: 0 0 0 6px color-mix(in srgb, var(--c) 30%, transparent), 0 6px 16px rgba(60,72,120,0.18); outline: none; }
+.island-label[hidden] { display: none; }
+
+/* ===================== 3. ISLAND PANEL ===================== */
+.panel {
+  position: fixed; z-index: 30; top: 86px; right: 16px; bottom: 16px; width: var(--panel-w);
+  background: var(--card-solid); border-radius: var(--radius); box-shadow: var(--shadow);
+  display: flex; flex-direction: column; overflow: hidden;
+  transform: translateX(calc(100% + 30px)); transition: transform 0.45s cubic-bezier(.2,.8,.2,1);
+}
+.panel.open { transform: none; }
+.panel-head { padding: 18px 20px 12px; border-bottom: 1px solid var(--line); display: flex; gap: 12px; align-items: flex-start; }
+.panel-head .badge { flex: none; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-weight: 800; font-size: 1.3rem; color: var(--ink); background: var(--c); }
+.panel-head h2 { margin: 0; font-size: 1.2rem; line-height: 1.25; }
+.panel-head .unit { font-size: 0.85rem; color: var(--ink-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.panel-close { margin-left: auto; flex: none; width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--line); background: #fff; font-size: 1.1rem; }
+.panel-body { padding: 16px 20px 24px; overflow-y: auto; line-height: 1.6; }
+.panel-body h3 { font-size: 1rem; margin: 20px 0 8px; }
+.intro { margin: 0; }
+.lessons { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.lessons li { background: #f6f8fd; border-radius: 12px; padding: 8px 12px; }
+.lessons b { display: block; }
+.lessons span { color: var(--ink-soft); font-size: 0.93em; }
+
+/* activity blocks */
+.activity { background: #f6f8fd; border-radius: 14px; padding: 14px; }
+.activity p { margin: 0 0 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 2px solid var(--line); background: #fff; border-radius: 12px; padding: 7px 12px; font-weight: 600; text-align: left; }
+.chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.chip.correct { border-color: var(--ok); background: var(--ok-bg); }
+.chip.wrong { border-color: #e0a85b; background: var(--warn-bg); }
+.chip:disabled { cursor: default; }
+.match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.match-grid .col { display: flex; flex-direction: column; gap: 8px; }
+.match-grid .col > b { font-size: 0.85rem; color: var(--ink-soft); }
+.feedback { margin-top: 10px; padding: 9px 12px; border-radius: 10px; font-weight: 600; min-height: 1em; }
+.feedback:empty { display: none; }
+.feedback.good { background: var(--ok-bg); color: var(--ok); }
+.feedback.hint { background: var(--warn-bg); color: var(--warn); }
+.order-list { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.order-list li { display: flex; align-items: center; gap: 8px; background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 6px 8px; }
+.order-list li span { flex: 1; font-weight: 600; }
+.order-list button { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--line); background: #fff; }
+.checks { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+.checks label { display: flex; gap: 8px; align-items: flex-start; }
+.checks input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--accent); }
+select.field, textarea.field, input.field { width: 100%; border: 2px solid var(--line); border-radius: 12px; padding: 8px 10px; background: #fff; }
+textarea.field { resize: vertical; min-height: 64px; }
+.scenario { background: #fff; border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; border: 2px solid var(--line); }
+.scenario p { margin: 0 0 8px; font-weight: 700; }
+.sort-card { background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+.sort-card p { margin: 0 0 8px; font-weight: 600; }
+.flip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+.flip { perspective: 600px; border: 0; background: none; padding: 0; min-height: 112px; text-align: left; }
+.flip-inner { position: relative; width: 100%; height: 100%; min-height: 112px; transition: transform 0.6s; transform-style: preserve-3d; }
+.flip[aria-pressed="true"] .flip-inner { transform: rotateY(180deg); }
+.flip-face { position: absolute; inset: 0; border-radius: 12px; padding: 10px; backface-visibility: hidden; border: 2px solid var(--line); background: #fff; display: flex; flex-direction: column; justify-content: center; }
+.flip-face b { font-size: 0.98rem; }
+.flip-face small { color: var(--ink-soft); }
+.flip-back { transform: rotateY(180deg); background: var(--accent-soft); border-color: var(--accent); font-size: 0.85rem; }
+.summary { margin-top: 10px; background: #fff; border-radius: 12px; padding: 10px 12px; border: 2px dashed var(--accent); }
+.summary:empty { display: none; }
+
+/* ===================== 4. TEXT-ONLY VIEW, HINT, FALLBACK ===================== */
+.text-view {
+  position: fixed; inset: 0; z-index: 25; overflow-y: auto; padding: 96px 18px 30px;
+  background: linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+}
+.text-view[hidden] { display: none; }
+.text-view .inner { max-width: 760px; margin: 0 auto; }
+.text-view h2 { margin: 0 0 6px; }
+.text-view ul { list-style: none; padding: 0; display: grid; gap: 10px; }
+.text-view li button {
+  width: 100%; text-align: left; background: var(--card-solid); border: 2px solid var(--line); border-radius: 14px;
+  padding: 12px 16px; display: flex; gap: 12px; align-items: center; box-shadow: 0 4px 12px rgba(60,72,120,0.08);
+}
+.text-view li button:hover { border-color: var(--accent); }
+.text-view .badge { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-weight: 800; background: var(--c); flex: none; }
+
+.hint-toast {
+  position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 40;
+  background: var(--card-solid); border-radius: 999px; padding: 10px 12px 10px 20px; box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 12px; font-weight: 700; max-width: calc(100vw - 32px);
+}
+.hint-toast[hidden] { display: none; }
+.hint-toast button { border: 0; background: var(--accent-soft); border-radius: 999px; padding: 6px 12px; font-weight: 700; }
+
+.fallback { position: fixed; inset: 0; display: grid; place-items: center; z-index: 5; padding: 20px; text-align: center; }
+.fallback[hidden] { display: none; }
+.fallback .box { background: var(--card-solid); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); max-width: 460px; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ===================== 5. LOW-STIMULATION MODE ===================== */
+body.low-stim {
+  --text-size: 17.5px;
+  --letter: 0.015em;
+  background: #e9edf3;
+}
+body.low-stim .text-view { background: #e9edf3; }
+body.low-stim #scene canvas { filter: saturate(0.55); }
+body.low-stim .panel { transition: none; }
+body.low-stim .flip-inner { transition: none; }
+body.low-stim .island-label, body.low-stim .switch .track, body.low-stim .switch .track::after { transition: none; }
+body.low-stim .panel-body { line-height: 1.75; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+
+/* ===================== 6. RESPONSIVE ===================== */
+@media (max-width: 760px) {
+  :root { --panel-w: 100%; }
+  .topbar { padding: 8px; }
+  .title { padding: 8px 12px; }
+  .title h1 { font-size: 1.05rem; }
+  .controls { padding: 6px; gap: 6px; }
+  .btn { padding: 6px 10px; font-size: 0.85rem; }
+  .vol input { width: 70px; }
+  /* bottom sheet on phones: the island stays visible in the upper part */
+  .panel { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; height: 58vh; transform: translateY(calc(100% + 20px)); }
+  .panel.open { transform: none; }
+  .match-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#textView" id="skipLink">Skip 3D view</a>
+
+<!-- ===================== TOP BAR ===================== -->
+<header class="topbar">
+  <div class="title">
+    <h1>Pforzheim AI Course Islands</h1>
+    <span class="by">by Prof Luarn</span>
+  </div>
+  <div class="controls" role="group" aria-label="Page settings">
+    <button class="btn" id="backBtn" type="button" hidden aria-label="Back to overview of all islands">&#x2190; Back to overview</button>
+    <button class="btn" id="textViewBtn" type="button" aria-pressed="false" aria-controls="textView">&#x2630; Skip 3D view</button>
+    <button class="btn" id="musicBtn" type="button" aria-pressed="false">&#x266A; Music: off</button>
+    <label class="vol" for="volume">Volume <input id="volume" type="range" min="0" max="1" step="0.05" value="0.4" aria-label="Music volume"></label>
+    <label class="switch" for="lowStim">
+      <input type="checkbox" id="lowStim">
+      <span class="track" aria-hidden="true"></span>
+      Low-stimulation mode
+    </label>
+  </div>
+</header>
+
+<!-- ===================== 3D SCENE ===================== -->
+<div id="scene" role="img" aria-label="3D map with six floating course islands A to F. Use the island buttons or the text-only view to explore."></div>
+<div class="labels" id="labels" aria-label="Islands"></div>
+
+<div class="fallback" id="fallback" hidden>
+  <div class="box" role="alert">
+    <h2>3D view not available</h2>
+    <p>Your browser or device does not support WebGL, so the 3D islands cannot be shown. No problem &ndash; all course content is available in the text-only list.</p>
+    <button class="btn primary" type="button" id="fallbackOpenList">Open the island list</button>
+  </div>
+</div>
+
+<!-- ===================== TEXT-ONLY VIEW ===================== -->
+<section class="text-view" id="textView" hidden aria-labelledby="textViewTitle" tabindex="-1">
+  <div class="inner">
+    <h2 id="textViewTitle">All islands (text-only view)</h2>
+    <p>Choose an island to read its lessons and try its activity.</p>
+    <ul id="textList"></ul>
+    <button class="btn" type="button" id="textViewClose">Show the 3D view</button>
+  </div>
+</section>
+
+<!-- ===================== ISLAND PANEL ===================== -->
+<aside class="panel" id="panel" role="dialog" aria-modal="false" aria-labelledby="panelTitle" aria-hidden="true">
+  <div class="panel-head">
+    <div class="badge" id="panelBadge" aria-hidden="true">A</div>
+    <div>
+      <div class="unit" id="panelUnit">Unit 1</div>
+      <h2 id="panelTitle" tabindex="-1">Island</h2>
+    </div>
+    <button class="panel-close" id="panelClose" type="button" aria-label="Close island panel and go back to the overview">&#x2715;</button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</aside>
+
+<div class="hint-toast" id="hint" role="status" hidden>
+  <span>Drag to rotate, scroll to zoom, click an island to explore.</span>
+  <button type="button" id="hintClose">Got it</button>
+</div>
+
+<!-- Three.js from the jsDelivr CDN (ES modules) -->
+<script type="importmap">
+{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+/* =====================================================================
+   1. COURSE DATA  -  edit island names, colours, lessons and activities here
+   ===================================================================== */
+const ISLANDS = [
+  {
+    id: 'A', unit: 'Unit 1', title: 'Getting Started with Perceptual AI',
+    color: '#bfe3c8', accent: '#8fcf9f', landmark: 'camera',
+    intro: 'Welcome aboard! On this island you set up your own course page and meet your first "seeing" AI tools. By the end you will have trained a small recognition model yourself.',
+    lessons: [
+      ['1.1 Build your own personal web page and course introduction', 'Set up your own course web page and learn how the course works.'],
+      ['1.2 Introduction to Google MediaPipe Tasks (perceptual AI)', 'Meet ready-made AI tasks that let a computer "see" faces, hands and objects.'],
+      ['1.3 Train your own recognition model with Teachable Machine', 'Teach a computer to recognise your own objects - no coding needed.'],
+      ['1.4 Image object recognition with Google Antigravity', 'Use an AI coding assistant to build an app that finds objects in photos.'],
+      ['1.5 Video object recognition with Google Antigravity', 'Take the same idea further and recognise objects in videos.'],
+    ],
+    activity: {
+      type: 'match', title: 'Match the tool to the task',
+      text: 'Click a tool, then click the task it fits best.',
+      pairs: [
+        ['Teachable Machine', 'Train a model on your own photos with a few clicks'],
+        ['MediaPipe', 'Find faces, hands or body poses in real time'],
+        ['Google Antigravity', 'Ask an AI coding assistant to build an app for you'],
+        ['Personal web page', 'Show your course projects online'],
+      ],
+    },
+  },
+  {
+    id: 'B', unit: 'Unit 2', title: 'MediaPipe Vision Tasks',
+    color: '#ffd6c9', accent: '#f6b3a1', landmark: 'face',
+    intro: 'This island is all about computer vision with MediaPipe. Each lesson shows a different way a computer can understand people in images and videos.',
+    lessons: [
+      ['2.1 MediaPipe Face Landmark Detection', 'Find hundreds of points on a face, such as eyes, nose and lips.'],
+      ['2.2 MediaPipe Video Face Landmark Detection', 'Follow those face points frame by frame in a video.'],
+      ['2.3 MediaPipe Pose Landmark Detection', 'Find key points of the body, like shoulders, elbows and knees.'],
+      ['2.4 MediaPipe Gesture Recognition', 'Recognise hand gestures such as thumbs-up in real time.'],
+      ['2.5 MediaPipe Image Segmentation', 'Separate a person from the background, pixel by pixel.'],
+      ['2.6 MediaPipe Face Detection', 'Find where faces are in a picture.'],
+    ],
+    activity: {
+      type: 'scenarios', title: 'Which task would you use?',
+      text: 'Pick the MediaPipe task that fits each idea.',
+      options: ['Face Landmark Detection', 'Video Face Landmark Detection', 'Pose Landmark Detection', 'Gesture Recognition', 'Image Segmentation', 'Face Detection'],
+      items: [
+        ['A fitness app counts how many squats you do.', 'Pose Landmark Detection', 'Squats are about body joints - pose landmarks track them.'],
+        ['You change slides with a thumbs-up.', 'Gesture Recognition', 'A thumbs-up is a hand gesture.'],
+        ['A video call replaces your messy room with a beach.', 'Image Segmentation', 'Segmentation separates you from the background.'],
+        ['Blur every face in a photo before sharing it.', 'Face Detection', 'You only need to know where the faces are.'],
+        ['Virtual glasses follow your eyes in a live video.', 'Video Face Landmark Detection', 'You need detailed face points, updated in every video frame.'],
+      ],
+    },
+  },
+  {
+    id: 'C', unit: 'Unit 3', title: 'Real-Time Models and Creative AI',
+    color: '#d9d1ff', accent: '#b7a9f5', landmark: 'easel',
+    intro: 'Here AI runs live and gets creative. You will detect objects in real time, turn photos into art and build your own little chat app.',
+    lessons: [
+      ['3.1 Teachable Machine Real-Time Object Classifier', 'Run your own trained model live on the webcam.'],
+      ['3.2 YOLO', 'Detect many objects at once, fast enough for live video.'],
+      ['3.3 Neural Style Transfer', 'Turn a photo into an artwork in the style of a famous painting.'],
+      ['3.4 Simple Chat App Built with a Gemini API Key', 'Build your own chat window that talks to a Gemini model.'],
+      ['3.5 Island Builder', 'Design an interactive 3D page with AI - just like this one.'],
+    ],
+    activity: {
+      type: 'order', title: 'Put the pipeline steps in order',
+      text: 'Every real-time AI app follows the same path. Use the arrows to sort the steps, then check.',
+      correct: ['Input: the camera captures an image', 'Prepare: resize the image for the model', 'Model: the AI makes a prediction', 'Output: the result is drawn on the screen'],
+    },
+  },
+  {
+    id: 'D', unit: 'Unit 4', title: 'Gemini and Multimodal Workflows',
+    color: '#c9ecf7', accent: '#9fd6ea', landmark: 'star',
+    intro: 'Multimodal AI understands text and images together. On this island you run a model on your own computer and explore how Gemini tools can work together in a workflow.',
+    lessons: [
+      ['4.1 Use a multimodal model to let Ollama recognize images', 'Run an AI model on your own computer that can describe pictures.'],
+      ['4.2 Gemini', 'Get to know the Gemini assistant and what it can help with.'],
+      ['4.3 Gemini Notebook', 'Collect your sources in one place and explore them with Gemini.'],
+      ['4.4 Gemini Canvas', 'Work on a document or small project together with Gemini.'],
+      ['4.5 Gemini Skills-1', 'Hands-on session exploring Gemini Skills (part 1).'],
+      ['4.6 Gemini Skills-2', 'Hands-on session exploring Gemini Skills (part 2).'],
+      ['4.7 Gemini Skills-3', 'Hands-on session exploring Gemini Skills (part 3).'],
+    ],
+    activity: {
+      type: 'helper', title: 'Design your own helper',
+      text: 'Pick a goal and tick the Gemini features you would combine.',
+      goals: ['Prepare for an exam', 'Plan a group project', 'Write a weekly report', 'Organise research for a thesis'],
+      features: [
+        ['Notebook', 'to collect your sources and ask questions about them'],
+        ['Canvas', 'to draft and improve your text step by step'],
+        ['Skills', 'to repeat a task the same way every time'],
+        ['Connectors', 'to bring in information from apps you already use'],
+        ['Scheduled Tasks', 'to let the helper work at a set time, e.g. every Monday'],
+      ],
+    },
+  },
+  {
+    id: 'E', unit: 'Unit 5', title: 'AI Agents',
+    color: '#fff0b8', accent: '#f4d97a', landmark: 'robot',
+    intro: 'Agents do more than answer: they plan steps and carry out tasks across tools. This island compares different agent platforms you will explore in class.',
+    lessons: [
+      ['5.1 n8n', 'Connect apps and AI into automated workflows with a visual editor.'],
+      ['5.2 ChatGPT multi-agent', 'See how several AI agents can share the work on one task.'],
+      ['5.3 ChatGPT Skills', 'Explore ChatGPT Skills in class.'],
+      ['5.4 ChatGPT Plugins - canva', 'Explore how ChatGPT can work together with Canva.'],
+      ['5.5 ChatGPT Sites', 'Explore ChatGPT Sites in class.'],
+      ['5.6 Claude Skills', 'Explore Claude Skills in class.'],
+      ['5.7 OpenClaw', 'Explore the OpenClaw agent in class.'],
+      ['5.8 Hermes Agent', 'Explore the Hermes Agent in class.'],
+    ],
+    activity: {
+      type: 'sort', title: 'Agent or chatbot?',
+      text: 'Decide for each task: is a chatbot enough, or do you need an agent?',
+      items: [
+        ['Explain a difficult term in simple words.', 'Chatbot', 'One question, one answer - a chatbot is perfect.'],
+        ['Every Monday, collect new emails, summarise them and post the summary to the team channel.', 'Agent', 'Several steps, several tools and a schedule - that is agent work.'],
+        ['Suggest three titles for my presentation.', 'Chatbot', 'A single creative answer is enough here.'],
+        ['Find a free meeting slot, book a room and send invitations to the group.', 'Agent', 'The AI has to act in different apps, step by step.'],
+      ],
+      reflection: 'What task would you hand to an agent?',
+    },
+  },
+  {
+    id: 'F', unit: 'Unit 6', title: 'The Next Wave of AI Tools',
+    color: '#ffd1e3', accent: '#f5a9c6', landmark: 'rocket',
+    intro: 'The final island looks ahead at new AI tools. You will explore them together in class and decide which ones are worth trying for your own work.',
+    lessons: [
+      ['6.1 Meta Muse', 'Explore in class.'],
+      ['6.2 Manus Cue!', 'Explore in class.'],
+      ['6.3 Hark Pro', 'Explore in class.'],
+      ['6.4 OpenAI Dots', 'Explore in class.'],
+      ['6.5 Grok Bot', 'Explore in class.'],
+      ['6.6 Claude Duet', 'Explore in class.'],
+    ],
+    activity: {
+      type: 'flip', title: 'Tool explorer',
+      text: 'Flip cards to see your exploration questions. Pick two tools to compare, then write one sentence about what you would try first.',
+      tools: ['Meta Muse', 'Manus Cue!', 'Hark Pro', 'OpenAI Dots', 'Grok Bot', 'Claude Duet'],
+    },
+  },
+];
+
+/* =====================================================================
+   2. SETTINGS + STATE (session memory for music / low-stimulation mode)
+   ===================================================================== */
+const store = {
+  get(k, d) { try { const v = sessionStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage blocked */ } },
+};
+const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const state = {
+  lowStim: store.get('ci-lowstim', prefersReduced),   // OS setting decides the first visit
+  music: store.get('ci-music', false),
+  volume: store.get('ci-volume', 0.4),
+  current: null,                                     // open island index or null
+};
+
+const $ = (id) => document.getElementById(id);
+const els = {
+  scene: $('scene'), labels: $('labels'), panel: $('panel'), panelBody: $('panelBody'), panelTitle: $('panelTitle'),
+  panelUnit: $('panelUnit'), panelBadge: $('panelBadge'), panelClose: $('panelClose'), backBtn: $('backBtn'),
+  textView: $('textView'), textList: $('textList'), textViewBtn: $('textViewBtn'), textViewClose: $('textViewClose'),
+  musicBtn: $('musicBtn'), volume: $('volume'), lowStim: $('lowStim'), hint: $('hint'), hintClose: $('hintClose'),
+  fallback: $('fallback'), fallbackOpenList: $('fallbackOpenList'), skipLink: $('skipLink'),
+};
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* =====================================================================
+   3. 3D SCENE (Three.js)
+   ===================================================================== */
+let THREE = null, OrbitControls = null;
+let renderer, scene, camera, controls, clock;
+let stars, clouds = [], skyMesh;
+const islandObjs = [];          // { group, base, glow, label, phase, pos }
+const HOME = { pos: null, target: null };
+let fly = null;                 // running camera animation
+let webglOK = false;
+
+function webglAvailable() {
+  try {
+    const c = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+  } catch (e) { return false; }
+}
+
+async function initScene() {
+  if (!webglAvailable()) throw new Error('no WebGL');
+  THREE = await import('three');
+  ({ OrbitControls } = await import('three/addons/controls/OrbitControls.js'));
+
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'low-power' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));   // cap for performance
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  els.scene.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 400);
+  // looking slightly above the ring centre keeps the islands clear of the top bar
+  HOME.pos = new THREE.Vector3(0, 14, 27);
+  HOME.target = new THREE.Vector3(0, 2.2, 0);
+  camera.position.copy(HOME.pos);
+
+  // gentle orbit controls with damping and limits so nobody gets lost
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.target.copy(HOME.target);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.06;
+  controls.enablePan = false;
+  controls.rotateSpeed = 0.55;
+  controls.zoomSpeed = 0.7;
+  controls.minDistance = 7;
+  controls.maxDistance = 38;
+  controls.minPolarAngle = 0.35;
+  controls.maxPolarAngle = 1.42;
+
+  // soft, shadow-free lighting
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xd9cfe8, 1.6));
+  const sun = new THREE.DirectionalLight(0xfff4e6, 1.2);
+  sun.position.set(8, 14, 6);
+  scene.add(sun);
+
+  buildSky();
+  buildIslands();
+  clock = new THREE.Clock();
+  window.addEventListener('resize', onResize);
+  setupPicking();
+  applyLowStim();
+  renderer.setAnimationLoop(tick);
+  webglOK = true;
+}
+
+/* --- sky: vertical pastel gradient dome, slow stars and drifting clouds --- */
+function buildSky() {
+  const geo = new THREE.SphereGeometry(180, 32, 16);
+  const mat = new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false,
+    uniforms: { top: { value: new THREE.Color('#b9cdfb') }, bottom: { value: new THREE.Color('#fde3ee') } },
+    vertexShader: 'varying float h; void main(){ h = normalize(position).y; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+    fragmentShader: 'uniform vec3 top; uniform vec3 bottom; varying float h; void main(){ gl_FragColor = vec4(mix(bottom, top, smoothstep(-0.2, 0.8, h)), 1.0); }',
+  });
+  skyMesh = new THREE.Mesh(geo, mat);
+  scene.add(skyMesh);
+
+  // faint stars (static brightness - no twinkling)
+  const n = 350, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const r = 120 + Math.random() * 40, th = Math.random() * Math.PI * 2, ph = Math.random() * 0.45 * Math.PI;
+    pos[i * 3] = r * Math.cos(th) * Math.cos(ph); pos[i * 3 + 1] = r * Math.sin(ph) + 10; pos[i * 3 + 2] = r * Math.sin(th) * Math.cos(ph);
+  }
+  const sg = new THREE.BufferGeometry();
+  sg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  stars = new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xffffff, size: 0.9, transparent: true, opacity: 0.75, depthWrite: false }));
+  scene.add(stars);
+
+  // soft clouds: clusters of white spheres
+  const cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 });
+  for (let i = 0; i < 7; i++) {
+    const c = new THREE.Group();
+    for (let j = 0; j < 4; j++) {
+      const s = new THREE.Mesh(new THREE.SphereGeometry(1.2 + Math.random() * 0.8, 12, 8), cloudMat);
+      s.position.set(j * 1.5 - 2, Math.random() * 0.5, Math.random() * 0.8);
+      c.add(s);
+    }
+    const a = (i / 7) * Math.PI * 2;
+    c.position.set(Math.cos(a) * 34, -6 + Math.random() * 14, Math.sin(a) * 34);
+    c.scale.setScalar(0.9 + Math.random() * 0.6);
+    c.userData.angle = a;
+    clouds.push(c);
+    scene.add(c);
+  }
+}
+
+/* --- islands: rounded grass top + low-poly rock base + a landmark --- */
+function mat(color, opts = {}) {
+  return new THREE.MeshStandardMaterial({ color, roughness: 0.85, metalness: 0, flatShading: !!opts.flat, ...opts.extra });
+}
+
+function buildIslands() {
+  const R = 10;
+  ISLANDS.forEach((d, i) => {
+    const g = new THREE.Group();
+    const a = (i / ISLANDS.length) * Math.PI * 2 - Math.PI / 2;
+    const base = new THREE.Vector3(Math.cos(a) * R, (i % 2 ? 0.6 : -0.3), Math.sin(a) * R);
+    g.position.copy(base);
+    // turn each island so its landmark (built facing +z) looks towards the overview camera
+    g.rotation.y = Math.atan2(HOME.pos.x - base.x, HOME.pos.z - base.z);
+
+    // grass dome
+    const top = new THREE.Mesh(new THREE.SphereGeometry(2.2, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), mat(d.color));
+    top.scale.set(1, 0.38, 1);
+    g.add(top);
+    // grass rim
+    const rim = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.05, 0.35, 32), mat(d.accent));
+    rim.position.y = -0.17;
+    g.add(rim);
+    // rock base (low-poly)
+    const rock = new THREE.Mesh(new THREE.ConeGeometry(2.05, 2.6, 9, 2), mat('#d8c7b8', { flat: true }));
+    rock.rotation.x = Math.PI;
+    rock.position.y = -1.65;
+    g.add(rock);
+    // two tiny trees
+    for (const [x, z] of [[-1.3, 0.6], [1.2, -0.9]]) g.add(tree(x, z));
+    // landmark
+    const lm = landmark(d.landmark, d);
+    lm.position.y = 0.55;
+    g.add(lm);
+
+    // soft halo ring for hover / focus (fades in, never flashes)
+    const glow = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.12, 8, 48),
+      new THREE.MeshBasicMaterial({ color: d.accent, transparent: true, opacity: 0, depthWrite: false }));
+    glow.rotation.x = Math.PI / 2;
+    glow.position.y = -0.15;
+    g.add(glow);
+
+    // soft "shadow" disc far below (cheap, no real shadows)
+    const shadow = new THREE.Mesh(new THREE.CircleGeometry(1.8, 24),
+      new THREE.MeshBasicMaterial({ color: '#8f8fb8', transparent: true, opacity: 0.12, depthWrite: false }));
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.y = -4.2;
+    g.add(shadow);
+
+    g.traverse((o) => { o.userData.islandIndex = i; });
+    scene.add(g);
+    islandObjs.push({ group: g, base, glow, phase: i * 1.3, label: null, glowTarget: 0 });
+  });
+}
+
+function tree(x, z) {
+  const t = new THREE.Group();
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.4, 6), mat('#b98f6b'));
+  trunk.position.y = 0.3;
+  const crown = new THREE.Mesh(new THREE.IcosahedronGeometry(0.35, 0), mat('#7cc79a', { flat: true }));
+  crown.position.y = 0.7;
+  t.add(trunk, crown);
+  t.position.set(x, 0.35, z);
+  return t;
+}
+
+// one small, cute landmark per island (simple geometric shapes)
+function landmark(type, d) {
+  const g = new THREE.Group();
+  const white = mat('#ffffff'), dark = mat('#4b5873'), soft = mat(d.accent);
+  if (type === 'camera') {                       // A: tiny camera tower
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 1.1, 8), dark); pole.position.y = 0.55;
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.6, 0.6), soft); body.position.y = 1.35;
+    const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.24, 0.3, 16), dark); lens.rotation.x = Math.PI / 2; lens.position.set(0, 1.35, 0.42);
+    const glass = new THREE.Mesh(new THREE.CircleGeometry(0.15, 16), mat('#a7c7ff')); glass.position.set(0, 1.35, 0.58);
+    g.add(pole, body, lens, glass);
+  } else if (type === 'face') {                  // B: face-shaped hill
+    const hill = new THREE.Mesh(new THREE.SphereGeometry(0.85, 24, 16), soft); hill.scale.set(1, 0.9, 0.8); hill.position.y = 0.7;
+    const e1 = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8), dark); e1.position.set(-0.28, 0.9, 0.66);
+    const e2 = e1.clone(); e2.position.x = 0.28;
+    const smile = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.04, 6, 16, Math.PI), dark); smile.rotation.z = Math.PI; smile.position.set(0, 0.62, 0.68);
+    const c1 = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 8), mat('#ff9fb3')); c1.position.set(-0.5, 0.68, 0.55);
+    const c2 = c1.clone(); c2.position.x = 0.5;
+    g.add(hill, e1, e2, smile, c1, c2);
+  } else if (type === 'easel') {                 // C: easel with a little painting (creative AI)
+    for (const x of [-0.35, 0.35]) { const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.6, 6), mat('#b98f6b')); leg.position.set(x, 0.75, 0); leg.rotation.z = x > 0 ? -0.15 : 0.15; g.add(leg); }
+    const canvas = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.8, 0.06), white); canvas.position.set(0, 1.1, 0.08);
+    const sunDot = new THREE.Mesh(new THREE.CircleGeometry(0.14, 16), mat('#ffcf6b')); sunDot.position.set(0.22, 1.25, 0.12);
+    const hillP = new THREE.Mesh(new THREE.CircleGeometry(0.32, 16, 0, Math.PI), mat('#8fcf9f')); hillP.position.set(-0.12, 0.8, 0.12);
+    g.add(canvas, sunDot, hillP);
+  } else if (type === 'star') {                  // D: Gemini-like four-point sparkle
+    const s = new THREE.Mesh(new THREE.OctahedronGeometry(0.6, 0), mat('#8ab4ff', { flat: true })); s.scale.set(0.55, 1.2, 0.55); s.position.y = 1.2;
+    const s2 = new THREE.Mesh(new THREE.OctahedronGeometry(0.6, 0), mat('#c5a8ff', { flat: true })); s2.scale.set(1.2, 0.55, 0.55); s2.position.y = 1.2;
+    const book = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.12, 0.5), soft); book.position.set(0.6, 0.1, 0.4);
+    g.add(s, s2, book);
+    g.userData.spin = s;
+  } else if (type === 'robot') {                 // E: robot hut (agents)
+    const hut = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.8, 0.8), soft); hut.position.y = 0.45;
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.5, 0.6), white); head.position.y = 1.15;
+    const e1 = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 8), dark); e1.position.set(-0.16, 1.18, 0.31);
+    const e2 = e1.clone(); e2.position.x = 0.16;
+    const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.35, 6), dark); ant.position.y = 1.55;
+    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8), mat('#ff9fb3')); bulb.position.y = 1.75;
+    const door = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.45), dark); door.position.set(0, 0.3, 0.41);
+    g.add(hut, head, e1, e2, ant, bulb, door);
+  } else if (type === 'rocket') {                // F: little rocket (next wave)
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.36, 1.3, 16), white); body.position.y = 0.85;
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.5, 16), soft); nose.position.y = 1.75;
+    const win = new THREE.Mesh(new THREE.CircleGeometry(0.12, 16), mat('#a7c7ff')); win.position.set(0, 1.05, 0.33);
+    g.add(body, nose, win);
+    for (let k = 0; k < 3; k++) {
+      const fin = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.4, 0.35), soft);
+      const a = (k / 3) * Math.PI * 2;
+      fin.position.set(Math.cos(a) * 0.38, 0.35, Math.sin(a) * 0.38); fin.rotation.y = -a;
+      g.add(fin);
+    }
+  }
+  return g;
+}
+
+/* --- HTML labels A-F (focusable buttons positioned over the islands) --- */
+function buildLabels() {
+  ISLANDS.forEach((d, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'island-label';
+    b.style.setProperty('--c', d.accent);
+    b.innerHTML = `<span class="dot" aria-hidden="true"></span>Island ${d.id}<small>${esc(d.unit)}</small>`;
+    b.setAttribute('aria-label', `Island ${d.id}, ${d.unit}: ${d.title}. Press Enter to open.`);
+    b.addEventListener('click', () => openIsland(i));
+    b.addEventListener('mouseenter', () => setHot(i, true));
+    b.addEventListener('mouseleave', () => setHot(i, false));
+    b.addEventListener('focus', () => setHot(i, true));
+    b.addEventListener('blur', () => setHot(i, false));
+    els.labels.appendChild(b);
+    if (islandObjs[i]) islandObjs[i].label = b;
+  });
+}
+
+let hotIndex = -1;
+function setHot(i, on) {
+  if (!webglOK) return;
+  islandObjs.forEach((o, k) => {
+    const hot = on ? k === i : false;
+    o.glowTarget = hot ? 0.55 : 0;
+    o.label?.classList.toggle('hot', hot);
+  });
+  hotIndex = on ? i : -1;
+  renderer.domElement.style.cursor = on ? 'pointer' : '';
+}
+
+/* --- pointer picking: click/tap on an island (a drag does not count as a click) --- */
+function setupPicking() {
+  const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+  let down = null;
+  const pick = (e) => {
+    const r = renderer.domElement.getBoundingClientRect();
+    ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(ptr, camera);
+    const hit = ray.intersectObjects(islandObjs.map((o) => o.group), true)[0];
+    return hit ? hit.object.userData.islandIndex : -1;
+  };
+  renderer.domElement.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY }; });
+  renderer.domElement.addEventListener('pointerup', (e) => {
+    if (!down) return;
+    const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
+    down = null;
+    if (moved > 6) return;
+    const i = pick(e);
+    if (i >= 0) openIsland(i);
+  });
+  renderer.domElement.addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse' || down) return;
+    const i = pick(e);
+    if (i !== hotIndex) setHot(i, i >= 0);
+  });
+  renderer.domElement.addEventListener('pointerleave', () => setHot(-1, false));
+}
+
+/* --- camera fly-to with easing (instant in low-stimulation mode) --- */
+const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+function flyTo(pos, target, duration = 1.4) {
+  if (!webglOK) return;
+  if (state.lowStim) duration = 0;
+  if (duration === 0) {
+    camera.position.copy(pos); controls.target.copy(target); controls.update(); fly = null; return;
+  }
+  fly = { fromP: camera.position.clone(), fromT: controls.target.clone(), toP: pos.clone(), toT: target.clone(), t: 0, d: duration };
+}
+
+// the panel covers part of the screen -> shift the rendered image so the island stays visible
+// The island is centred in the free area between the top bar and the panel.
+function freeArea() {
+  const w = window.innerWidth, h = window.innerHeight;
+  const top = document.querySelector('.topbar').getBoundingClientRect().bottom;
+  if (isPhone()) return { x0: 0, x1: w, y0: top, y1: h * 0.42 - 8 };                 // bottom sheet = 58vh
+  return { x0: 0, x1: w - (els.panel.getBoundingClientRect().width + 16), y0: top, y1: h };
+}
+const isPhone = () => window.innerWidth <= 760;
+
+function updateViewOffset() {
+  if (!webglOK) return;
+  const w = window.innerWidth, h = window.innerHeight;
+  if (state.current === null) { camera.clearViewOffset(); camera.updateProjectionMatrix(); return; }
+  const a = freeArea();
+  const dx = w / 2 - (a.x0 + a.x1) / 2, dy = h / 2 - (a.y0 + a.y1) / 2;
+  camera.setViewOffset(w, h, dx, dy, w, h);           // shift the image so the island sits in the free area
+}
+
+function islandWorldPos(i) {
+  return islandObjs[i].group.position.clone();
+}
+
+function tick() {
+  const dt = Math.min(clock.getDelta(), 0.05), t = clock.elapsedTime;
+  const calm = state.lowStim;
+
+  islandObjs.forEach((o, i) => {
+    // slow bobbing (off in low-stimulation mode)
+    o.group.position.y = o.base.y + (calm ? 0 : Math.sin(t * 0.45 + o.phase) * 0.18);
+    // glow fades smoothly towards its target (never flashes); no glow in low-stimulation mode
+    const m = o.glow.material;
+    const target = calm ? 0 : o.glowTarget;
+    m.opacity += (target - m.opacity) * Math.min(1, dt * 4);
+    const spin = o.group.children.find((c) => c.userData.spin)?.userData.spin;
+    if (spin && !calm) spin.parent.rotation.y += dt * 0.25;
+  });
+
+  if (!calm) {
+    stars.rotation.y += dt * 0.004;
+    clouds.forEach((c) => { c.userData.angle += dt * 0.008; const a = c.userData.angle; c.position.x = Math.cos(a) * 34; c.position.z = Math.sin(a) * 34; });
+  }
+
+  if (fly) {
+    fly.t = Math.min(1, fly.t + dt / fly.d);
+    const k = ease(fly.t);
+    camera.position.lerpVectors(fly.fromP, fly.toP, k);
+    controls.target.lerpVectors(fly.fromT, fly.toT, k);
+    if (fly.t >= 1) fly = null;
+  }
+  controls.update();
+
+  // keep the A-F labels above their islands
+  const v = new THREE.Vector3();
+  const w = window.innerWidth, h = window.innerHeight;
+  islandObjs.forEach((o) => {
+    if (!o.label) return;
+    v.copy(o.group.position); v.y += 3.2;
+    v.project(camera);
+    const behind = v.z > 1;
+    o.label.hidden = behind;
+    o.label.style.transform = `translate(${(v.x * 0.5 + 0.5) * w}px, ${(-v.y * 0.5 + 0.5) * h}px) translate(-50%, -100%)`;
+  });
+
+  renderer.render(scene, camera);
+}
+
+function onResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  updateViewOffset();
+}
+
+/* =====================================================================
+   4. PANEL + NAVIGATION
+   ===================================================================== */
+let lastFocus = null;
+function openIsland(i) {
+  const d = ISLANDS[i];
+  lastFocus = document.activeElement;
+  state.current = i;
+  els.panel.style.setProperty('--c', d.color);
+  els.panelBadge.textContent = d.id;
+  els.panelUnit.textContent = `${d.unit} · Island ${d.id}`;
+  els.panelTitle.textContent = d.title;
+  els.panelBody.innerHTML = `
+    <p class="intro">${esc(d.intro)}</p>
+    <h3>Lessons</h3>
+    <ol class="lessons">${d.lessons.map(([t, desc]) => `<li><b>${esc(t)}</b><span>${esc(desc)}</span></li>`).join('')}</ol>
+    <h3 id="actTitle">Activity: ${esc(d.activity.title)}</h3>
+    <div class="activity" id="activity" role="group" aria-labelledby="actTitle"></div>`;
+  renderActivity(d.activity, $('activity'), d);
+  els.panel.classList.add('open');
+  els.panel.setAttribute('aria-hidden', 'false');
+  els.panel.setAttribute('aria-label', `Island ${d.id}: ${d.title}`);
+  els.backBtn.hidden = false;
+  els.panelBody.scrollTop = 0;
+
+  if (webglOK) {
+    // camera looks at the island from outside the ring, slightly above
+    const p = islandWorldPos(i);
+    // approach from the viewer's side, so the landmark faces the camera
+    const dir = new THREE.Vector3(HOME.pos.x - p.x, 0, HOME.pos.z - p.z).normalize();
+    // the less free space there is (phone: only ~1/3 of the screen), the further back the camera stays
+    const a = freeArea();
+    const space = Math.min((a.x1 - a.x0) / window.innerWidth, (a.y1 - a.y0) / window.innerHeight);
+    const dist = 8.5 / Math.max(0.35, Math.min(1, space * 1.25));
+    const camPos = p.clone().add(dir.multiplyScalar(dist)).add(new THREE.Vector3(0, dist * 0.5, 0));
+    flyTo(camPos, new THREE.Vector3(p.x, islandObjs[i].base.y + 0.6, p.z));
+    requestAnimationFrame(updateViewOffset);
+  }
+  els.panelTitle.focus({ preventScroll: true });
+}
+
+function closeIsland() {
+  if (state.current === null) return;
+  state.current = null;
+  els.panel.classList.remove('open');
+  els.panel.setAttribute('aria-hidden', 'true');
+  els.backBtn.hidden = true;
+  updateViewOffset();
+  if (webglOK) flyTo(HOME.pos, HOME.target);
+  if (lastFocus && document.contains(lastFocus) && !lastFocus.closest('#textView[hidden]')) lastFocus.focus({ preventScroll: true });
+}
+
+function showTextView(on) {
+  els.textView.hidden = !on;
+  els.textViewBtn.setAttribute('aria-pressed', String(on));
+  if (on) els.textView.focus();
+}
+
+function buildTextList() {
+  els.textList.innerHTML = ISLANDS.map((d, i) => `
+    <li><button type="button" data-i="${i}" style="--c:${d.color}">
+      <span class="badge" aria-hidden="true">${d.id}</span>
+      <span><b>Island ${d.id} &middot; ${esc(d.unit)}</b><br>${esc(d.title)}</span>
+    </button></li>`).join('');
+  els.textList.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => openIsland(Number(b.dataset.i))));
+}
+
+/* =====================================================================
+   5. ACTIVITIES (one small interactive task per island)
+   ===================================================================== */
+function feedback(box, text, good) { box.textContent = text; box.className = `feedback ${good ? 'good' : 'hint'}`; }
+const shuffle = (a) => a.map((v) => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map((x) => x[1]);
+
+function renderActivity(act, root, island) {
+  const uid = `act-${island.id}`;
+  root.innerHTML = `<p>${esc(act.text)}</p>`;
+  const fb = document.createElement('div');
+  fb.className = 'feedback'; fb.setAttribute('role', 'status'); fb.setAttribute('aria-live', 'polite');
+
+  if (act.type === 'match') {                     // A: match tool -> task
+    const grid = document.createElement('div');
+    grid.className = 'match-grid';
+    grid.innerHTML = `<div class="col"><b>Tools</b>${act.pairs.map(([tool], i) => `<button type="button" class="chip" data-tool="${i}" aria-pressed="false">${esc(tool)}</button>`).join('')}</div>
+      <div class="col"><b>Tasks</b>${shuffle(act.pairs.map((p, i) => [p[1], i])).map(([task, i]) => `<button type="button" class="chip" data-task="${i}">${esc(task)}</button>`).join('')}</div>`;
+    root.append(grid, fb);
+    let picked = null, solved = 0;
+    grid.querySelectorAll('[data-tool]').forEach((b) => b.addEventListener('click', () => {
+      grid.querySelectorAll('[data-tool]').forEach((x) => x.setAttribute('aria-pressed', 'false'));
+      b.setAttribute('aria-pressed', 'true'); picked = b;
+      feedback(fb, `Now choose the task for "${b.textContent}".`, true);
+    }));
+    grid.querySelectorAll('[data-task]').forEach((b) => b.addEventListener('click', () => {
+      if (!picked) { feedback(fb, 'First pick a tool on the left.', false); return; }
+      if (picked.dataset.tool === b.dataset.task) {
+        picked.classList.add('correct'); b.classList.add('correct');
+        picked.disabled = true; b.disabled = true; picked.setAttribute('aria-pressed', 'false'); picked = null;
+        solved += 1;
+        feedback(fb, solved === act.pairs.length ? 'All matched - great start on Island A!' : 'Correct! Pick the next tool.', true);
+      } else {
+        b.classList.add('wrong'); setTimeout(() => b.classList.remove('wrong'), 900);
+        feedback(fb, 'Not quite - have another look at what this tool is good at.', false);
+      }
+    }));
+  } else if (act.type === 'scenarios') {          // B: which task would you use?
+    act.items.forEach(([q, answer, why], k) => {
+      const box = document.createElement('div');
+      box.className = 'scenario';
+      box.innerHTML = `<p id="${uid}-q${k}">${esc(q)}</p>
+        <select class="field" aria-labelledby="${uid}-q${k}"><option value="">Choose a task...</option>${act.options.map((o) => `<option>${esc(o)}</option>`).join('')}</select>
+        <div class="feedback" role="status" aria-live="polite"></div>`;
+      const sel = box.querySelector('select'), f = box.querySelector('.feedback');
+      sel.addEventListener('change', () => {
+        if (!sel.value) { f.textContent = ''; f.className = 'feedback'; return; }
+        if (sel.value === answer) feedback(f, `Nice choice! ${why}`, true);
+        else feedback(f, `Good thinking, but there is a better fit. Hint: ${why}`, false);
+      });
+      root.append(box);
+    });
+  } else if (act.type === 'order') {              // C: order the pipeline
+    let order = shuffle(act.correct.slice());
+    if (order.join() === act.correct.join()) order = order.reverse();
+    const list = document.createElement('ol'); list.className = 'order-list';
+    const draw = () => {
+      list.innerHTML = order.map((s, k) => `<li><span>${k + 1}. ${esc(s)}</span>
+        <button type="button" data-k="${k}" data-d="-1" aria-label="Move up: ${esc(s)}" ${k === 0 ? 'disabled' : ''}>&#x2191;</button>
+        <button type="button" data-k="${k}" data-d="1" aria-label="Move down: ${esc(s)}" ${k === order.length - 1 ? 'disabled' : ''}>&#x2193;</button></li>`).join('');
+      list.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+        const k = Number(b.dataset.k), j = k + Number(b.dataset.d);
+        [order[k], order[j]] = [order[j], order[k]];
+        draw();
+        list.querySelector(`button[data-k="${j}"][data-d="${b.dataset.d}"]`)?.focus() || list.querySelector(`button[data-k="${j}"]`)?.focus();
+      }));
+    };
+    draw();
+    const check = document.createElement('button');
+    check.type = 'button'; check.className = 'btn primary'; check.textContent = 'Check my order';
+    check.addEventListener('click', () => {
+      const right = order.filter((s, k) => s === act.correct[k]).length;
+      if (right === order.length) feedback(fb, 'Perfect! Input → prepare → model → output. That is the heart of every real-time app.', true);
+      else feedback(fb, `${right} of ${order.length} steps are in the right place. Tip: it always starts with the camera.`, false);
+    });
+    root.append(list, check, fb);
+  } else if (act.type === 'helper') {             // D: design your own helper
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `<label for="${uid}-goal"><b>My goal</b></label>
+      <select class="field" id="${uid}-goal">${act.goals.map((g) => `<option>${esc(g)}</option>`).join('')}</select>
+      <fieldset style="border:0;padding:0;margin:10px 0 0"><legend><b>Features I would combine</b></legend>
+      <div class="checks">${act.features.map(([f, why], k) => `<label><input type="checkbox" value="${k}"> <span><b>${esc(f)}</b> &ndash; ${esc(why)}</span></label>`).join('')}</div></fieldset>`;
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'btn primary'; btn.textContent = 'Show my helper';
+    const sum = document.createElement('div'); sum.className = 'summary'; sum.setAttribute('aria-live', 'polite');
+    btn.addEventListener('click', () => {
+      const goal = wrap.querySelector('select').value;
+      const picked = [...wrap.querySelectorAll('input:checked')].map((c) => act.features[Number(c.value)]);
+      if (!picked.length) { sum.innerHTML = '<b>Tick at least one feature</b> to build your helper.'; return; }
+      sum.innerHTML = `<b>Your helper for "${esc(goal)}"</b><br>It uses ${picked.map(([f, why]) => `<b>${esc(f)}</b> ${esc(why)}`).join('; ')}.<br>
+        ${picked.length >= 3 ? 'A well-rounded team of features - nice!' : 'A focused helper. You can always add more features later.'}`;
+    });
+    root.append(wrap, btn, sum);
+  } else if (act.type === 'sort') {               // E: agent or chatbot?
+    act.items.forEach(([task, answer, why], k) => {
+      const card = document.createElement('div');
+      card.className = 'sort-card';
+      card.innerHTML = `<p id="${uid}-s${k}">${esc(task)}</p>
+        <div class="chips" role="group" aria-labelledby="${uid}-s${k}">
+          <button type="button" class="chip" data-a="Chatbot">&#x1F4AC; Chatbot</button>
+          <button type="button" class="chip" data-a="Agent">&#x1F916; Agent</button></div>
+        <div class="feedback" role="status" aria-live="polite"></div>`;
+      const f = card.querySelector('.feedback');
+      card.querySelectorAll('[data-a]').forEach((b) => b.addEventListener('click', () => {
+        card.querySelectorAll('[data-a]').forEach((x) => x.classList.remove('correct', 'wrong'));
+        if (b.dataset.a === answer) { b.classList.add('correct'); feedback(f, `Yes! ${why}`, true); }
+        else { b.classList.add('wrong'); feedback(f, `Hmm, think again. ${why.split(' - ')[0]}...`, false); }
+      }));
+      root.append(card);
+    });
+    const ref = document.createElement('div');
+    ref.innerHTML = `<label for="${uid}-ref"><b>${esc(act.reflection)}</b></label>
+      <textarea class="field" id="${uid}-ref" placeholder="Write a sentence or two..."></textarea>
+      <p style="font-size:0.85em;color:var(--ink-soft);margin:6px 0 0">Your text stays in this browser tab only.</p>`;
+    root.append(ref);
+  } else if (act.type === 'flip') {               // F: tool explorer card flip
+    const grid = document.createElement('div'); grid.className = 'flip-grid';
+    grid.innerHTML = act.tools.map((t, k) => `<button type="button" class="flip" aria-pressed="false" data-k="${k}" aria-label="${esc(t)} card, press to flip">
+      <span class="flip-inner"><span class="flip-face"><b>${esc(t)}</b><small>Tap to flip</small></span>
+      <span class="flip-face flip-back">Explore in class: What is it for? Who might use it? What would you try first?</span></span></button>`).join('');
+    grid.querySelectorAll('.flip').forEach((b) => b.addEventListener('click', () => b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true'))));
+    const cmp = document.createElement('div');
+    cmp.innerHTML = `<p style="margin:12px 0 6px"><b>Compare two tools</b></p>
+      <div class="match-grid">
+        <div><label for="${uid}-t1">Tool 1</label><select class="field" id="${uid}-t1">${act.tools.map((t) => `<option>${esc(t)}</option>`).join('')}</select></div>
+        <div><label for="${uid}-t2">Tool 2</label><select class="field" id="${uid}-t2">${act.tools.map((t, k) => `<option ${k === 1 ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></div>
+      </div>
+      <label for="${uid}-sent" style="display:block;margin-top:8px">One sentence: what would you try first?</label>
+      <textarea class="field" id="${uid}-sent" placeholder="I would first try ... because ..."></textarea>`;
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn primary'; btn.textContent = 'Save my comparison';
+    btn.style.marginTop = '8px';
+    const sum = document.createElement('div'); sum.className = 'summary'; sum.setAttribute('aria-live', 'polite');
+    btn.addEventListener('click', () => {
+      const t1 = cmp.querySelector(`#${uid}-t1`).value, t2 = cmp.querySelector(`#${uid}-t2`).value;
+      const s = cmp.querySelector(`#${uid}-sent`).value.trim();
+      if (t1 === t2) { sum.innerHTML = 'Please pick <b>two different</b> tools to compare.'; return; }
+      if (!s) { sum.innerHTML = 'Write one sentence about what you would try first.'; return; }
+      sum.innerHTML = `<b>${esc(t1)} vs. ${esc(t2)}</b><br>&ldquo;${esc(s)}&rdquo;<br>Bring this idea to class and test it together!`;
+    });
+    root.append(grid, cmp, btn, sum);
+  }
+}
+
+/* =====================================================================
+   6. AMBIENT MUSIC (Web Audio API, generated live - no audio files)
+      Soft pad chords + a slow pentatonic melody through a gentle echo.
+      Customise: SCALE (notes), CHORDS, tempo in scheduleMelody().
+   ===================================================================== */
+const SCALE = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 587.33];      // C major pentatonic (+octave)
+const CHORDS = [[130.81, 196.0, 261.63], [110.0, 164.81, 220.0], [146.83, 220.0, 293.66], [98.0, 146.83, 196.0]];
+const audio = { ctx: null, master: null, timers: [], playing: false };
+
+function initAudio() {
+  if (audio.ctx) return;
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const master = ctx.createGain(); master.gain.value = 0;
+  // soft echo instead of a heavy reverb
+  const delay = ctx.createDelay(); delay.delayTime.value = 0.45;
+  const fbk = ctx.createGain(); fbk.gain.value = 0.35;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800;
+  delay.connect(fbk); fbk.connect(delay); delay.connect(lp);
+  master.connect(lp); lp.connect(ctx.destination);
+  audio.ctx = ctx; audio.master = master; audio.delay = delay;
+}
+
+function playTone(freq, start, dur, type, peak, toDelay = false) {
+  const { ctx, master } = audio;
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, start);
+  g.gain.linearRampToValueAtTime(peak, start + Math.min(1.5, dur * 0.4));     // slow attack, no clicks
+  g.gain.linearRampToValueAtTime(0, start + dur);
+  o.connect(g); g.connect(master);
+  if (toDelay) g.connect(audio.delay);
+  o.start(start); o.stop(start + dur + 0.05);
+}
+
+function scheduleMusic() {
+  const { ctx } = audio;
+  let chord = 0;
+  const pad = () => {                                   // a new soft chord every 8 s
+    const now = ctx.currentTime;
+    CHORDS[chord % CHORDS.length].forEach((f) => playTone(f, now, 8.5, 'sine', 0.05));
+    chord += 1;
+  };
+  const melody = () => {                                // one gentle note every ~2-3 s
+    const now = ctx.currentTime;
+    if (Math.random() < 0.8) playTone(SCALE[Math.floor(Math.random() * SCALE.length)], now, 2.6, 'triangle', 0.035, true);
+  };
+  pad(); melody();
+  audio.timers.push(setInterval(pad, 8000), setInterval(melody, 2400));
+}
+
+function setMusic(on) {
+  if (state.lowStim) on = false;                        // music is disabled in low-stimulation mode
+  state.music = on;
+  store.set('ci-music', on);
+  els.musicBtn.setAttribute('aria-pressed', String(on));
+  els.musicBtn.innerHTML = on ? '&#x266A; Music: on' : '&#x266A; Music: off';
+  if (on) {
+    initAudio();
+    audio.ctx.resume();
+    if (!audio.playing) { scheduleMusic(); audio.playing = true; }
+    audio.master.gain.cancelScheduledValues(audio.ctx.currentTime);
+    audio.master.gain.linearRampToValueAtTime(state.volume, audio.ctx.currentTime + 1.5);   // gentle fade-in
+  } else if (audio.ctx) {
+    audio.master.gain.cancelScheduledValues(audio.ctx.currentTime);
+    audio.master.gain.linearRampToValueAtTime(0, audio.ctx.currentTime + 0.8);
+    audio.timers.forEach(clearInterval); audio.timers = []; audio.playing = false;
+    setTimeout(() => { if (!state.music) audio.ctx.suspend(); }, 900);
+  }
+}
+
+/* =====================================================================
+   7. LOW-STIMULATION MODE
+   ===================================================================== */
+function applyLowStim() {
+  const on = state.lowStim;
+  document.body.classList.toggle('low-stim', on);
+  els.lowStim.checked = on;
+  els.musicBtn.disabled = on;
+  els.volume.disabled = on;
+  els.musicBtn.title = on ? 'Music is off in low-stimulation mode' : '';
+  if (on && state.music) { setMusic(false); state.musicWasOn = true; }
+  if (!webglOK) return;
+  // flat, calm background without stars, clouds or glow; no camera easing
+  stars.visible = !on;
+  clouds.forEach((c) => { c.visible = !on; });
+  skyMesh.visible = !on;
+  scene.background = on ? new THREE.Color('#e9edf3') : null;
+  controls.enableDamping = !on;
+  if (on) fly && flyTo(fly.toP, fly.toT, 0);
+}
+
+/* =====================================================================
+   8. WIRING + START
+   ===================================================================== */
+els.panelClose.addEventListener('click', closeIsland);
+els.backBtn.addEventListener('click', () => { closeIsland(); });
+els.textViewBtn.addEventListener('click', () => showTextView(els.textView.hidden));
+els.textViewClose.addEventListener('click', () => { showTextView(false); els.textViewBtn.focus(); });
+els.skipLink.addEventListener('click', (e) => { e.preventDefault(); showTextView(true); });
+els.fallbackOpenList.addEventListener('click', () => showTextView(true));
+els.hintClose.addEventListener('click', () => { els.hint.hidden = true; store.set('ci-hint-seen', true); });
+
+els.musicBtn.addEventListener('click', () => setMusic(!state.music));
+els.volume.value = state.volume;
+els.volume.addEventListener('input', () => {
+  state.volume = Number(els.volume.value);
+  store.set('ci-volume', state.volume);
+  if (audio.ctx && state.music) audio.master.gain.setTargetAtTime(state.volume, audio.ctx.currentTime, 0.2);
+});
+els.lowStim.addEventListener('change', () => {
+  state.lowStim = els.lowStim.checked;
+  store.set('ci-lowstim', state.lowStim);
+  applyLowStim();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (state.current !== null) { e.preventDefault(); closeIsland(); }
+    else if (!els.textView.hidden) { showTextView(false); els.textViewBtn.focus(); }
+    else if (!els.hint.hidden) els.hint.hidden = true;
+  }
+});
+
+// browsers block audio until the user interacts: resume remembered music on the first click / key
+const resumeMusic = () => { if (state.music && !state.lowStim && (!audio.ctx || audio.ctx.state !== 'running')) setMusic(true); };
+document.addEventListener('pointerdown', resumeMusic, { once: true });
+document.addEventListener('keydown', resumeMusic, { once: true });
+
+(async function start() {
+  buildTextList();
+  els.musicBtn.innerHTML = state.music ? '&#x266A; Music: on (click page to start)' : '&#x266A; Music: off';
+  els.musicBtn.setAttribute('aria-pressed', String(state.music));
+  try {
+    await initScene();
+    buildLabels();
+  } catch (err) {
+    console.warn('3D view unavailable:', err);
+    els.fallback.hidden = false;
+    els.scene.setAttribute('aria-hidden', 'true');
+  }
+  applyLowStim();
+  if (!store.get('ci-hint-seen', false) && webglOK) els.hint.hidden = false;
+})();
+</script>
+</body>
+</html>

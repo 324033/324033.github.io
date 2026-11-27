@@ -1,0 +1,68 @@
+[
+  {
+    "id": "candy",
+    "name": "Candy",
+    "source": "ONNX Model Zoo",
+    "file": "candy.onnx"
+  },
+  {
+    "id": "mosaic",
+    "name": "Mosaic",
+    "source": "ONNX Model Zoo",
+    "file": "mosaic.onnx"
+  },
+  {
+    "id": "rain-princess",
+    "name": "Rain Princess",
+    "source": "ONNX Model Zoo",
+    "file": "rain-princess.onnx"
+  },
+  {
+    "id": "udnie",
+    "name": "Udnie",
+    "source": "ONNX Model Zoo",
+    "file": "udnie.onnx"
+  },
+  {
+    "id": "pointilism",
+    "name": "Pointilism",
+    "source": "ONNX Model Zoo",
+    "file": "pointilism.onnx"
+  },
+  {
+    "id": "composition_vii",
+    "name": "Composition VII",
+    "source": "fast-neural-style (J. Johnson)",
+    "file": "composition_vii.onnx"
+  },
+  {
+    "id": "feathers",
+    "name": "Feathers",
+    "source": "fast-neural-style (J. Johnson)",
+    "file": "feathers.onnx"
+  },
+  {
+    "id": "la_muse",
+    "name": "La Muse",
+    "source": "fast-neural-style (J. Johnson)",
+    "file": "la_muse.onnx"
+  },
+  {
+    "id": "starry_night",
+    "name": "Starry Night",
+    "source": "fast-neural-style (J. Johnson)",
+    "file": "starry_night.onnx"
+  },
+  {
+    "id": "the_scream",
+    "name": "The Scream",
+    "source": "fast-neural-style (J. Johnson)",
+    "file": "the_scream.onnx"
+  },
+  {
+    "id": "the_wave",
+    "name": "The Wave",
+    "source": "fast-neural-style (J. Johnson)",
+    "file": "the_wave.onnx"
+  }
+]

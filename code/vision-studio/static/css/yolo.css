@@ -1,0 +1,49 @@
+/* YOLO26 page - extends style.css */
+.yolo-logo { background: linear-gradient(135deg, #f59e0b, #ef4444) !important; }
+
+.y-source-pills { display: grid; grid-template-columns: repeat(4, 1fr); }
+.y-source-pills .pill-btn { padding-left: 4px; padding-right: 4px; font-size: 0.82rem; }
+
+.y-source-panel { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.y-source-panel[hidden] { display: none; }
+.y-go { margin-top: 6px; }
+
+.y-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.y-small-select { width: auto; min-width: 110px; }
+
+.y-tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+.y-tools .btn-action { justify-content: center; padding-left: 6px; padding-right: 6px; }
+.btn-action:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.y-metrics { grid-template-columns: repeat(4, 1fr); }
+
+.fit-stage[hidden], .fit-status[hidden] { display: none; }
+
+.y-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) { .y-bottom { grid-template-columns: 1fr; } }
+
+.y-counts { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; max-height: 260px; overflow-y: auto; }
+
+.y-count-row {
+    display: grid;
+    grid-template-columns: 12px 1fr 1fr 60px;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    border: 1px solid transparent;
+    color: var(--text-primary);
+    font: 500 0.85rem var(--font);
+    cursor: pointer;
+    text-align: left;
+}
+.y-count-row:hover { border-color: var(--border-color); }
+.y-count-row.off { opacity: 0.4; text-decoration: line-through; }
+.y-count-row .sw { width: 12px; height: 12px; border-radius: 3px; background: var(--c); }
+.y-count-row .bar { height: 6px; border-radius: 999px; background: var(--bg-secondary); overflow: hidden; }
+.y-count-row .bar i { display: block; height: 100%; background: var(--c); }
+.y-count-row .num { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.y-count-row .num b { color: var(--text-primary); }
+
+.y-chart { width: 100%; height: 140px; margin-top: 10px; display: block; }

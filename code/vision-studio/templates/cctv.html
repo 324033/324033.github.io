@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCTV Traffic Analytics</title>
+    <link rel="stylesheet" href="/static/css/style.css?v={{ asset_version('css/style.css') }}">
+    <link rel="stylesheet" href="/static/css/yolo.css?v={{ asset_version('css/yolo.css') }}">
+    <link rel="stylesheet" href="/static/css/cctv.css?v={{ asset_version('css/cctv.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <div class="header-left">
+            <div class="logo-icon cctv-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 7l13-4 2 6-13 4z"/><path d="M7 12l1 4h4"/><path d="M18 9l3-1"/><circle cx="12" cy="19" r="2"/>
+                </svg>
+            </div>
+            <div>
+                <h1>CCTV Traffic Analytics</h1>
+                <p class="subtitle">YOLO26n in the browser &bull; Vehicle counting &bull; Heatmap &bull; Speed estimation</p>
+            </div>
+        </div>
+        <div class="header-nav">
+            <a class="nav-tab nav-tab-link" href="/yolo">&#x2190; YOLO26 Detection</a>
+            <a class="nav-tab nav-tab-link" href="/">Vision Studio</a>
+        </div>
+        <div class="header-status">
+            <span class="status-dot" id="cStatusDot"></span>
+            <span class="status-text" id="cModelStatus">Loading YOLO26n...</span>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="control-panel">
+            <!-- STREAM -->
+            <div class="panel-card">
+                <h2 class="card-title">CCTV Stream</h2>
+                <label class="input-label" for="cUrl">MJPEG stream URL</label>
+                <input type="text" id="cUrl" class="styled-text-input" value="https://cctv.klcg.gov.tw/facd4662">
+                <div class="c-btn-row">
+                    <button class="btn-primary" id="cStartBtn">&#x25B6; Connect</button>
+                    <button class="btn-action" id="cStopBtn" type="button" disabled>&#x25A0; Stop</button>
+                </div>
+                <span class="param-hint" id="cStreamInfo">Keelung City traffic camera (about 1 frame per second).</span>
+            </div>
+
+            <!-- COUNTING -->
+            <div class="panel-card">
+                <h2 class="card-title">1 &middot; Vehicle Counting</h2>
+                <p class="param-hint">A vehicle is counted once when its track crosses the counting line. Draw your own line across the road.</p>
+                <div class="c-btn-row">
+                    <button class="btn-action" id="cDrawLineBtn" type="button">&#x270F;&#xFE0F; Draw counting line</button>
+                    <button class="btn-action" id="cResetCountBtn" type="button">&#x21BA; Reset counts</button>
+                </div>
+                <div class="c-dir-grid">
+                    <div class="c-dir"><span class="c-dir-label">Direction A &rarr;</span><b id="cDirA">0</b></div>
+                    <div class="c-dir"><span class="c-dir-label">&larr; Direction B</span><b id="cDirB">0</b></div>
+                </div>
+                <div class="param-group" style="margin-top:12px">
+                    <div class="param-header">
+                        <label for="cConf">Detection confidence</label>
+                        <span class="param-val" id="cConfVal">30%</span>
+                    </div>
+                    <input type="range" id="cConf" min="0.15" max="0.8" step="0.05" value="0.3" class="range-slider">
+                </div>
+            </div>
+
+            <!-- HEATMAP -->
+            <div class="panel-card">
+                <h2 class="card-title">2 &middot; Heatmap</h2>
+                <label class="custom-checkbox-label"><input type="checkbox" id="cHeatToggle" checked> Show traffic heatmap</label>
+                <div class="param-group" style="margin-top:10px">
+                    <div class="param-header">
+                        <label for="cHeatOpacity">Opacity</label>
+                        <span class="param-val" id="cHeatOpacityVal">55%</span>
+                    </div>
+                    <input type="range" id="cHeatOpacity" min="0.1" max="0.9" step="0.05" value="0.55" class="range-slider">
+                </div>
+                <div class="param-group">
+                    <label class="input-label" for="cHeatDecay">Memory</label>
+                    <select id="cHeatDecay" class="styled-select">
+                        <option value="0" selected>Keep everything (cumulative)</option>
+                        <option value="300">Fade out over ~5 minutes</option>
+                        <option value="60">Fade out over ~1 minute</option>
+                    </select>
+                </div>
+                <button class="btn-action" id="cResetHeatBtn" type="button" style="width:100%;justify-content:center">&#x21BA; Reset heatmap</button>
+            </div>
+
+            <!-- SPEED -->
+            <div class="panel-card">
+                <h2 class="card-title">3 &middot; Speed Estimation</h2>
+                <p class="param-hint">Speed = distance moved between frames &divide; time. The metre scale comes from each vehicle&rsquo;s own size (typical width: car 1.8 m, bus 2.5 m, truck 2.4 m, motorcycle 0.8 m), so perspective is handled automatically. Treat the values as estimates.</p>
+                <div class="param-group" style="margin-top:10px">
+                    <div class="param-header">
+                        <label for="cLimit">Speed limit (highlight above)</label>
+                        <span class="param-val" id="cLimitVal">50 km/h</span>
+                    </div>
+                    <input type="range" id="cLimit" min="20" max="120" step="5" value="50" class="range-slider">
+                </div>
+                <div class="param-group">
+                    <div class="param-header">
+                        <label for="cCalib">Calibration factor</label>
+                        <span class="param-val" id="cCalibVal">&times;1.00</span>
+                    </div>
+                    <input type="range" id="cCalib" min="0.5" max="2" step="0.05" value="1" class="range-slider">
+                    <span class="param-hint">Fine-tune if you know the real speed of a vehicle.</span>
+                </div>
+                <label class="custom-checkbox-label"><input type="checkbox" id="cShowSpeed" checked> Show speed &amp; ID on vehicles</label>
+            </div>
+        </section>
+
+        <section class="results-panel">
+            <div class="metrics-bar c-metrics">
+                <div class="metric-item"><span class="metric-label">Vehicles counted</span><span class="metric-value" id="cTotal">0</span></div>
+                <div class="metric-item"><span class="metric-label">In view now</span><span class="metric-value" id="cInView">0</span></div>
+                <div class="metric-item"><span class="metric-label">Avg speed</span><span class="metric-value" id="cAvgSpeed">&ndash;</span></div>
+                <div class="metric-item"><span class="metric-label">Max speed</span><span class="metric-value" id="cMaxSpeed">&ndash;</span></div>
+                <div class="metric-item"><span class="metric-label">Stream</span><span class="metric-value metric-value-sm" id="cFps">&ndash;</span></div>
+            </div>
+
+            <div class="viewer-card" id="cViewer">
+                <div class="empty-state" id="cEmpty">
+                    <div class="empty-icon">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                            <path d="M3 7l13-4 2 6-13 4z"/><path d="M7 12l1 4h4"/><path d="M18 9l3-1"/>
+                        </svg>
+                    </div>
+                    <h3>Connect to the CCTV camera</h3>
+                    <p>Click &ldquo;Connect&rdquo;. The counting line is placed automatically &ndash; you can redraw it at any time.</p>
+                </div>
+                <div class="fit-stage" id="cStage" hidden>
+                    <canvas id="cCanvas" class="live-canvas"></canvas>
+                    <div class="call-overlay">
+                        <span class="call-rec"><i></i>CCTV LIVE</span>
+                        <span class="call-mode" id="cModeBadge">Tracking</span>
+                    </div>
+                    <div class="fit-status" id="cStatus" hidden></div>
+                </div>
+                <img id="cImg" class="hidden-video" alt="">
+            </div>
+
+            <div class="y-bottom">
+                <div class="details-card">
+                    <div class="details-header"><h3>Counts by vehicle type</h3><span class="param-hint">A &rarr; / &larr; B</span></div>
+                    <div class="c-table" id="cClassTable"><p class="param-hint">No vehicles counted yet.</p></div>
+                </div>
+                <div class="details-card">
+                    <div class="details-header"><h3>Vehicles per minute</h3><span class="param-hint">last 15 min</span></div>
+                    <canvas id="cRateChart" class="y-chart" height="140"></canvas>
+                </div>
+            </div>
+
+            <div class="details-card">
+                <div class="details-header"><h3>Recent vehicles crossing the line</h3>
+                    <button class="btn-action" id="cExportBtn" type="button">&#x2B07; Export CSV</button>
+                </div>
+                <div class="c-log" id="cLog"><p class="param-hint">Waiting for the first vehicle&hellip;</p></div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.webgpu.min.js"></script>
+<script src="/static/js/cctv.js?v={{ asset_version('js/cctv.js') }}"></script>
+</body>
+</html>

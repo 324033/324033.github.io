@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Chat</title>
+    <link rel="stylesheet" href="/static/css/chat.css?v={{ asset_version('css/chat.css') }}">
+</head>
+<body>
+<div class="chat-app">
+    <header class="chat-top">
+        <div class="brand">
+            <div class="logo" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>
+            </div>
+            <div>
+                <h1>Gemini Chat</h1>
+                <p>Your API key stays on this computer &ndash; the browser only talks to the local server.</p>
+            </div>
+        </div>
+        <div class="top-actions">
+            <label class="sr-only" for="cModel">Model</label>
+            <select id="cModel"></select>
+            <button type="button" id="cNew" title="Start a new conversation">&#x2795; New chat</button>
+            <a href="/" class="link">Vision Studio</a>
+        </div>
+    </header>
+
+    <div class="setup" id="cSetup" hidden>
+        <h2>&#x1F511; Add your API key first</h2>
+        <ol>
+            <li>In the project folder, copy <code>.env.example</code> and name the copy <code>.env</code>.</li>
+            <li>Open <code>.env</code> in a text editor and paste your key after <code>GEMINI_API_KEY=</code> &ndash; no quotes, no spaces.</li>
+            <li>Save the file and click <button type="button" id="cRecheck">Check again</button> (no server restart needed).</li>
+        </ol>
+        <p class="hint">Never paste the key into this chat or into code that goes to GitHub. <code>.env</code> is excluded by <code>.gitignore</code>.</p>
+    </div>
+
+    <main class="messages" id="cMessages" aria-live="polite">
+        <div class="welcome" id="cWelcome">
+            <h2>Hi! Ask me anything.</h2>
+            <p>Press <kbd>Enter</kbd> to send, <kbd>Shift</kbd>+<kbd>Enter</kbd> for a new line.</p>
+        </div>
+    </main>
+
+    <form class="composer" id="cForm">
+        <label class="sr-only" for="cInput">Your message</label>
+        <textarea id="cInput" rows="1" placeholder="Type a message..." autocomplete="off"></textarea>
+        <button type="submit" id="cSend" class="send">Send</button>
+        <button type="button" id="cStop" class="stop" hidden>Stop</button>
+    </form>
+    <p class="footer-note" id="cStatus"></p>
+</div>
+<script src="/static/js/chat.js?v={{ asset_version('js/chat.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+/* Neural Style Transfer page - extends styles.css */
+.nst-logo { background: linear-gradient(135deg, #ec4899, #8b5cf6); }
+
+
+.drop {
+    position: relative; display: grid; place-items: center; text-align: center; min-height: 150px;
+    border: 2px dashed var(--line); border-radius: 12px; background: var(--bg); cursor: pointer; overflow: hidden;
+    font-size: 0.85rem; color: var(--muted); padding: 10px;
+}
+.drop:hover, .drop.drag { border-color: var(--accent); }
+.drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.drop img { max-width: 100%; max-height: 220px; border-radius: 8px; display: block; }
+.drop img[hidden] { display: none; }
+
+.style-list { display: flex; flex-direction: column; gap: 6px; }
+.style-item {
+    display: grid; grid-template-columns: 18px 1fr; gap: 8px; align-items: start; padding: 8px 10px;
+    border: 1px solid var(--line); border-radius: 8px; background: var(--bg); cursor: pointer; font-size: 0.86rem;
+}
+.style-item:has(input:checked) { border-color: var(--accent); }
+.style-item input { width: 16px; height: 16px; margin-top: 2px; accent-color: var(--accent); }
+.style-item small { display: block; color: var(--muted); font-size: 0.74rem; }
+
+.mini-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.mini-row button { padding: 6px; font-size: 0.8rem; }
+
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.gallery .empty { grid-column: 1 / -1; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 40px 24px; text-align: center; color: var(--muted); }
+.gallery .empty h2 { color: var(--text); font-size: 1.15rem; margin-bottom: 6px; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
+.card .pic { position: relative; background: #000; aspect-ratio: 4 / 3; display: grid; place-items: center; cursor: zoom-in; }
+.card canvas { max-width: 100%; max-height: 100%; display: block; }
+.card .busy { position: absolute; inset: 0; display: grid; place-content: center; gap: 10px; justify-items: center; color: var(--muted); font-size: 0.85rem; background: rgba(15, 23, 42, 0.7); }
+.card .busy[hidden] { display: none; }
+.card .meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 12px; }
+.card .meta b { font-size: 0.95rem; }
+.card .meta small { color: var(--muted); font-size: 0.75rem; display: block; }
+.card .meta a { color: var(--accent); font-weight: 600; font-size: 0.82rem; text-decoration: none; white-space: nowrap; }
+.card .meta a[aria-disabled="true"] { opacity: 0.4; pointer-events: none; }
+.card.original .pic { cursor: default; }
+
+.lightbox { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.88); display: grid; place-items: center; z-index: 50; padding: 20px; }
+.lightbox[hidden] { display: none; }
+.lb-inner { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; max-width: 95vw; max-height: 92vh; display: flex; flex-direction: column; gap: 10px; }
+.lb-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.lb-actions { display: flex; gap: 8px; }
+.lb-actions button, .btn-link { width: auto; padding: 7px 12px; font-size: 0.85rem; }
+.btn-link { color: #1a1205; background: var(--accent); border-radius: 8px; text-decoration: none; font-weight: 600; }
+#nLbCanvas { max-width: 90vw; max-height: 78vh; object-fit: contain; border-radius: 8px; }
+
+/* ---- v2: thumbnails, processing banner, notes ---- */
+.details-box { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+.sec-title { font-size: 1rem; margin-bottom: 10px; }
+.sec-title small { color: var(--muted); font-weight: 400; font-size: 0.78rem; margin-left: 6px; }
+
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+.thumb {
+    position: relative; padding: 0; border: 2px solid var(--line); border-radius: 10px; overflow: hidden;
+    background: var(--bg); cursor: pointer; text-align: left; display: flex; flex-direction: column;
+}
+.thumb:hover:not(:disabled) { border-color: var(--accent); }
+.thumb:disabled { cursor: not-allowed; }
+.thumb img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; background: #0b1222; }
+.thumb span { padding: 6px 8px; font-size: 0.8rem; font-weight: 600; color: var(--text); }
+.thumb small { display: block; font-weight: 400; color: var(--muted); font-size: 0.7rem; }
+.thumb.done { border-color: var(--ok); }
+.thumb.busy::after { content: 'Processing...'; position: absolute; inset: 0; display: grid; place-items: center; background: rgba(15, 23, 42, 0.75); font-size: 0.78rem; font-weight: 700; color: #fff; }
+
+.processing { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; background: rgba(245, 158, 11, 0.12); border: 1px solid var(--accent); font-weight: 600; }
+.processing[hidden] { display: none; }
+
+.note { margin-top: 6px; font-size: 0.78rem; color: var(--muted); border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: var(--bg); }
+.note b { color: var(--text); }
+.note a, .credits a { color: var(--accent); }
+.credits p { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+
+.card .meta button { width: auto; padding: 6px 10px; font-size: 0.8rem; color: #1a1205; background: var(--accent); border-color: var(--accent); }
+.card .meta button:disabled { opacity: 0.4; }

@@ -1,2 +1,2 @@
 Neural Style Transfer
-https://drluarn.github.io/
+https://324033.github.io/projects/yolo26-tasks/style.html
